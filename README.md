@@ -9,7 +9,12 @@ En la carpeta 'Archivos Java' debemos de copiar los '.java' desde nuestra carpet
  (Si teneis dudas preguntar que no se como explicarlo).  
 Las demas carpetas son las típicas de la práctica 4.
 
-3. Recordatorío de los comandos para trabajar.  
+3. Comprobación inicial.
+Iniciar Tomcat en Xampp, una vez arrancado en el buscados poner `localhost:8080/PROYECTO-STGIN` esto deberia de habrir una pagina que al darle al boton azul ejecuta el '.class'
+
+
+RECORDATORIO COMANDOS TRABAJO  
+
 Siempre que abramos el cmd tenemos que trabajr en el directorio, para ello al abrir cmd ponemo `cd C:\xampp\tomcat\webapps\PROYECTO-STGIN`.  
 Despues tendremos que actualizarlo con lo último, para ello se usa el comando `git pull origin main`.
 Cuando hayamos realizado los cambios pertinentes deberemos de hacer 3 comandos. Priemro `git add .` Segundo `git commit -m "Poned aquí qué habéis cambiado"` Tercero `git push origin main`.  
