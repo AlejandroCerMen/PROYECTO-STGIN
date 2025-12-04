@@ -1,0 +1,11 @@
+<web-app>
+    <servlet>
+        <servlet-name>Juego</servlet-name>
+        <servlet-class>OcaServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Juego</servlet-name>
+        <url-pattern>/jugar</url-pattern>
+    </servlet-mapping>
+</web-app>
