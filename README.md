@@ -18,4 +18,6 @@ RECORDATORIO COMANDOS TRABAJO
 Siempre que abramos el cmd tenemos que trabajr en el directorio, para ello al abrir cmd ponemo `cd C:\xampp\tomcat\webapps\PROYECTO-STGIN`.  
 Despues tendremos que actualizarlo con lo último, para ello se usa el comando `git pull origin main`.
 Cuando hayamos realizado los cambios pertinentes deberemos de hacer 3 comandos. Priemro `git add .` Segundo `git commit -m "Poned aquí qué habéis cambiado"` Tercero `git push origin main`.  
-Si al hacer el push os da error (texto rojo), significa que alguien subió cosas antes que tú. Haced primero git pull origin main y luego volved a intentar el push.
+Si al hacer el push os da error (texto rojo), significa que alguien subió cosas antes que tú. Haced primero git pull origin main y luego volved a intentar el push.  
+
+A Pablo le va
