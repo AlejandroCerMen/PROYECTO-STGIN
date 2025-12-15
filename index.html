@@ -39,7 +39,7 @@
 
     <div class="contenedor">
         <h3>Iniciar Sesión</h3>
-        <form action="login" method="POST">
+        <form action="LoginServlet" method="post">
             <input type="text" name="nick" placeholder="Usuario" required>
             <input type="password" name="password" placeholder="Contraseña" required>
             <button type="submit" style="background-color: lightgreen;">Entrar</button>
@@ -47,7 +47,7 @@
 
         <hr> <h3>¿Nuevo Usuario?</h3>
         <p style="font-size: small;">Regístrate para jugar</p>
-        <form action="registro" method="POST">
+        <form action="RegistroServlet" method="post">
             <input type="text" name="nick" placeholder="Elige tu Nick" required>
             <input type="password" name="password" placeholder="Elige Contraseña" required>
             <button type="submit" style="background-color: lightblue;">Crear Cuenta</button>
