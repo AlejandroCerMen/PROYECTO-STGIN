@@ -14,8 +14,11 @@ public class RegistroServlet extends HttpServlet {
 
         // 1. Recibir datos del formulario
         String nick = request.getParameter("nick");
-        String pass = request.getParameter("password");
-
+        String passPlana = request.getParameter("password"); // Contraseña legible (1234)
+        
+        // PASO NUEVO: Codificar la contraseña
+        String passHash = Seguridad.codificar(passPlana); // Contraseña segura (a665a45920...)
+        
         out.println("<html><body style='text-align:center; font-family:sans-serif;'>");
 
         Connection con = null;
@@ -31,7 +34,7 @@ public class RegistroServlet extends HttpServlet {
                 String sql = "INSERT INTO usuarios (nick, password) VALUES (?, ?)";
                 ps = con.prepareStatement(sql);
                 ps.setString(1, nick);
-                ps.setString(2, pass);
+                ps.setString(2, passHash);
 
                 // 4. Ejecutar
                 int filasAfectadas = ps.executeUpdate();
