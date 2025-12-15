@@ -1,11 +1,19 @@
 <web-app>
     <servlet>
-        <servlet-name>Juego</servlet-name>
-        <servlet-class>OcaServlet</servlet-class>
+        <servlet-name>ServletLogin</servlet-name>
+        <servlet-class>LoginServlet</servlet-class>
     </servlet>
-
     <servlet-mapping>
-        <servlet-name>Juego</servlet-name>
-        <url-pattern>/jugar</url-pattern>
+        <servlet-name>ServletLogin</servlet-name>
+        <url-pattern>/login</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ServletRegistro</servlet-name>
+        <servlet-class>RegistroServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ServletRegistro</servlet-name>
+        <url-pattern>/registro</url-pattern>
     </servlet-mapping>
 </web-app>

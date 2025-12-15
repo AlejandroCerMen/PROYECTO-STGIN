@@ -1,14 +1,58 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Menu Principal STGI</title>
+    <meta charset="UTF-8">
+    <title>Juego de la Oca - STGI</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 50px; }
-        .btn { padding: 10px 20px; background: blue; color: white; text-decoration: none; border-radius: 5px;}
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin-top: 50px;
+        }
+        .contenedor {
+            background-color: white;
+            width: 300px;
+            margin: 0 auto; /* Esto centra la caja */
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        input {
+            display: block;
+            width: 90%;
+            margin: 10px auto;
+            padding: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+            width: 100%;
+        }
+        hr { margin: 20px 0; }
     </style>
 </head>
 <body>
-    <h1>Proyecto STGIN</h1>
-    <a href="jugar" class="btn">Iniciar Juego (Probar Servlet)</a>
+
+    <h1>🦆 La Oca Online</h1>
+    <p>Proyecto Final STGI</p>
+
+    <div class="contenedor">
+        <h3>Iniciar Sesión</h3>
+        <form action="login" method="POST">
+            <input type="text" name="nick" placeholder="Usuario" required>
+            <input type="password" name="password" placeholder="Contraseña" required>
+            <button type="submit" style="background-color: lightgreen;">Entrar</button>
+        </form>
+
+        <hr> <h3>¿Nuevo Usuario?</h3>
+        <p style="font-size: small;">Regístrate para jugar</p>
+        <form action="registro" method="POST">
+            <input type="text" name="nick" placeholder="Elige tu Nick" required>
+            <input type="password" name="password" placeholder="Elige Contraseña" required>
+            <button type="submit" style="background-color: lightblue;">Crear Cuenta</button>
+        </form>
+    </div>
+
 </body>
 </html>
