@@ -6,40 +6,51 @@ import java.sql.*;
 public class RegistroServlet extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         
-        String nick = request.getParameter("nick");
-        String pass = request.getParameter("password");
-        String passHash = Seguridad.codificar(pass);
+        String nombreRecibido = request.getParameter("nick");
+        String passRecibido = request.getParameter("password");
+        String passHash = Seguridad.codificar(passRecibido);
+
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
         try {
-            Connection con = ConexionDB.obtenerConexion();
+            con = ConexionDB.obtenerConexion();
             
-            // 1. Insertamos (RETURN_GENERATED_KEYS es vital para saber su nueva ID)
-            String sql = "INSERT INTO usuarios (nick, password) VALUES (?, ?)";
-            PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, nick);
+            // --- CAMBIO PRINCIPAL: Insertar en 'Jugadores' ---
+            String sql = "INSERT INTO Jugadores (Nombre, Password) VALUES (?, ?)";
+            
+            // Necesitamos RETURN_GENERATED_KEYS para saber qué ID le ha tocado
+            ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, nombreRecibido);
             ps.setString(2, passHash);
-            ps.executeUpdate();
             
-            // 2. Recuperamos la ID que MySQL le ha dado
-            ResultSet rs = ps.getGeneratedKeys();
+            ps.executeUpdate(); // Ejecutamos el registro
+            
+            // Recuperamos el ID generado automáticamente
+            rs = ps.getGeneratedKeys();
             if (rs.next()) {
                 int idNuevo = rs.getInt(1);
 
-                // 3. ¡Login Automático! Creamos la sesión aquí mismo
+                // --- LOGIN AUTOMÁTICO ---
                 HttpSession session = request.getSession();
                 session.setAttribute("id_usuario", idNuevo);
-                session.setAttribute("nick_usuario", nick);
+                session.setAttribute("nick_usuario", nombreRecibido);
 
-                // 4. Nos vamos al menú
+                // Vamos al menú
                 response.sendRedirect("menu.jsp");
             }
-            con.close();
 
         } catch (Exception e) {
-            // Si entra aquí, es probable que el Nick ya exista (por el UNIQUE de SQL)
+            // Si entra aquí, suele ser porque el nombre ya existe (Duplicado)
             response.setContentType("text/html;charset=UTF-8");
             PrintWriter out = response.getWriter();
-            out.println("<script>alert('Error: Ese NICK ya está en uso. Prueba otro.'); window.location='index.html';</script>");
+            out.println("<script>alert('Error: Ese nombre ya está en uso. Elige otro.'); window.location='index.html';</script>");
+            e.printStackTrace();
+        } finally {
+            try { if (rs != null) rs.close(); } catch (Exception e) {}
+            try { if (ps != null) ps.close(); } catch (Exception e) {}
+            try { if (con != null) con.close(); } catch (Exception e) {}
         }
     }
 }

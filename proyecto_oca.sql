@@ -14,14 +14,91 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
--- Volcando datos para la tabla proyecto_oca.participantes: ~0 rows (aproximadamente)
+-- Volcando datos para la tabla proyecto_oca.detallespartida: ~0 rows (aproximadamente)
+
+-- Volcando datos para la tabla proyecto_oca.jugadores: ~1 rows (aproximadamente)
+INSERT INTO `jugadores` (`IdJugador`, `Nombre`, `Password`) VALUES
+	(1, 'alejandro', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4');
 
 -- Volcando datos para la tabla proyecto_oca.partidas: ~0 rows (aproximadamente)
 
--- Volcando datos para la tabla proyecto_oca.usuarios: ~0 rows (aproximadamente)
-INSERT INTO `usuarios` (`id`, `nick`, `password`, `victorias`) VALUES
-	(3, 'Alejandro', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', 0),
-	(4, 'admin', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 0);
+-- Volcando datos para la tabla proyecto_oca.tablero: ~63 rows (aproximadamente)
+INSERT INTO `tablero` (`Casilla`, `IdTipo`) VALUES
+	(1, 1),
+	(2, 1),
+	(3, 1),
+	(4, 1),
+	(5, 2),
+	(6, 3),
+	(7, 1),
+	(8, 1),
+	(9, 2),
+	(10, 1),
+	(11, 1),
+	(12, 3),
+	(13, 1),
+	(14, 2),
+	(15, 1),
+	(16, 1),
+	(17, 1),
+	(18, 2),
+	(19, 4),
+	(20, 1),
+	(21, 1),
+	(22, 1),
+	(23, 2),
+	(24, 1),
+	(25, 1),
+	(26, 1),
+	(27, 2),
+	(28, 1),
+	(29, 1),
+	(30, 1),
+	(31, 5),
+	(32, 2),
+	(33, 1),
+	(34, 1),
+	(35, 1),
+	(36, 2),
+	(37, 1),
+	(38, 1),
+	(39, 1),
+	(40, 1),
+	(41, 2),
+	(42, 6),
+	(43, 1),
+	(44, 1),
+	(45, 2),
+	(46, 1),
+	(47, 1),
+	(48, 1),
+	(49, 1),
+	(50, 2),
+	(51, 1),
+	(52, 7),
+	(53, 1),
+	(54, 2),
+	(55, 1),
+	(56, 1),
+	(57, 1),
+	(58, 8),
+	(59, 2),
+	(60, 1),
+	(61, 1),
+	(62, 1),
+	(63, 9);
+
+-- Volcando datos para la tabla proyecto_oca.tipocasilla: ~9 rows (aproximadamente)
+INSERT INTO `tipocasilla` (`IdTipo`, `Nombre`) VALUES
+	(1, 'Normal'),
+	(2, 'Oca'),
+	(3, 'Puente'),
+	(4, 'Posada'),
+	(5, 'Pozo'),
+	(6, 'Laberinto'),
+	(7, 'Carcel'),
+	(8, 'Calavera'),
+	(9, 'Meta');
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
