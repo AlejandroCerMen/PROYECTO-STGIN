@@ -9,7 +9,10 @@ En la carpeta 'Archivos Java' debemos de copiar los '.java' desde nuestra carpet
  (Si teneis dudas preguntar que no se como explicarlo).  
 Las demas carpetas son las típicas de la práctica 4.
 
-3. Comprobación inicial.
+3. Base de datos.  
+Recordad iniciar mySQL en XAMPP ademas de actualizar la base de datos en HeidiSQL
+
+4. Comprobación inicial.
 Iniciar Tomcat en Xampp, una vez arrancado en el buscados poner `localhost:8080/PROYECTO-STGIN` esto deberia de habrir una pagina que al darle al boton azul ejecuta el '.class'
 
 
