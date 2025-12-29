@@ -1,99 +1,102 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="java.sql.*" %>
+<%@ page import="java.util.*" %>
 <%
-    if (session.getAttribute("id_usuario") == null) {
-        response.sendRedirect("index.html");
+    // 1. SEGURIDAD: Si no hay usuario o partida, fuera.
+    if (session.getAttribute("id_usuario") == null || session.getAttribute("id_partida") == null) {
+        response.sendRedirect("menu.jsp");
         return;
+    }
+    
+    int idPartida = (Integer) session.getAttribute("id_partida");
+    List<Integer> jugadoresOrden = new ArrayList<>();
+    
+    // 2. CONEXIÓN PARA SABER QUIÉNES JUEGAN Y SUS COLORES
+    Connection con = null;
+    try {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        String url = "jdbc:mysql://localhost:3306/proyecto_oca?useSSL=false&serverTimezone=UTC"; 
+        con = DriverManager.getConnection(url, "root", "");
+        
+        String sql = "SELECT Orden FROM DetallesPartida WHERE IdPartida = ? ORDER BY Orden ASC";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, idPartida);
+        ResultSet rs = ps.executeQuery();
+        
+        while(rs.next()){
+            jugadoresOrden.add(rs.getInt("Orden")); // Guardamos el orden (1, 2, 3...) de cada jugador
+        }
+        con.close();
+    } catch(Exception e) {
+        e.printStackTrace();
     }
 %>
 <!DOCTYPE html>
 <html>
 <head>
     <title>Juego de la Oca</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: gap:;">
     <style>
-        body {          
-            background-color: #2c3e50;
-            margin: 0;
-            padding: 10px;
-            text-align: center;
-            overflow-y: auto; 
-        }
-
-        h1 {
-            color: white; 
-            font-size: 24px;
-            margin: 10px 0;
-        }
+        body { background-color: #2c3e50; margin: 0; padding: 10px; text-align: center; font-family: 'Segoe UI', sans-serif; }
+        h1 { color: white; font-size: 24px; margin: 10px 0; text-shadow: 2px 2px 4px black; }
 
         .tablero-contenedor {
-            width: 600px;
-            height: 600px;
-            
-            margin: 0 auto;
-            position: relative;
-            
-            /* IMAGEN DE FONDO */
-            background-image: url('imagenes/tablero.jpg');
-            background-size: 100% 100%;
-            
-            border: 6px solid #f1c40f;
-            border-radius: 12px;
+            width: 600px; height: 600px; margin: 0 auto; position: relative;
+            background-image: url('imagenes/tablero.jpg'); background-size: 100% 100%;
+            border: 6px solid #f1c40f; border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.7);
         }
 
         .casilla {
-            position: absolute;     
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: absolute;
+            /* Usamos GRID para que si hay varias fichas se coloquen bien (2x2) */
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            align-items: center; justify-items: center;
             
-            /* --- BORDE ROJO PARA PROBAR (BÓRRALO LUEGO) --- */
-            border: 1px dashed red; 
-            
-            /* Texto semitransparente para que no moleste */
-            color: rgba(0,0,0,0.4); 
-            font-weight: 900;
-            font-size: 14px; 
-            
-            z-index: 10;
-        }
-        
-        /* La meta tiene un estilo propio en el CSS, pero la posición la da el JS */
-        #casilla-63 {
-            color: green;
-            background-color: rgba(0, 255, 0, 0.1);
-            border: 2px solid green;
+            border: 1px dashed rgba(255,0,0,0.3); /* Borde semitransparente para depurar */
+            color: rgba(0,0,0,0.5); font-weight: 900; font-size: 12px; z-index: 10;
         }
 
-        /* HE ELIMINADO LA CLASE .ficha QUE HABÍA AQUÍ */
-
-        .btn-volver {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 8px 16px;
-            background-color: #e74c3c;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 14px;
+        /* ESTILOS DE LAS FICHAS */
+        .ficha {
+            width: 15px; height: 15px; /* Un poco más pequeñas para que quepan varias */
+            border-radius: 50%; border: 2px solid white;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            transition: all 0.5s ease;
         }
+        .f-1 { background-color: blue; }
+        .f-2 { background-color: red; }
+        .f-3 { background-color: green; }
+        .f-4 { background-color: yellow; }
+
+        .btn-volver { display: inline-block; margin-top: 15px; padding: 8px 16px; background-color: #e74c3c; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1>Partida de <%= session.getAttribute("nick_usuario") %></h1>
+
+    <h1>Partida en Juego (ID: <%= idPartida %>)</h1>
 
     <div class="tablero-contenedor">
         <% 
-           // Generamos los 63 DIVs (Sin la lógica de la ficha)
            for (int i = 1; i <= 63; i++) { 
         %>
             <div class="casilla" id="casilla-<%=i%>">
-                <%= i %>
+                <% 
+                   // SI ES LA CASILLA 1, PINTAMOS A TODOS LOS JUGADORES
+                   if (i == 1) { 
+                       for(Integer orden : jugadoresOrden) {
+                %>
+                        <div class="ficha f-<%= orden %>" title="Jugador <%= orden %>"></div>
+                <% 
+                       }
+                   } 
+                %>
             </div>
         <% } %>
     </div>
 
-    <a href="menu.jsp" class="btn-volver">Volver al Menú</a>
-
+    <a href="menu.jsp" class="btn-volver">Abandonar Partida</a>
     <script>
         // Mapa con la posición (left, top) y tamaño (width, height) en PORCENTAJES
         const mapaCasillas = [

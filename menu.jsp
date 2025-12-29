@@ -24,28 +24,23 @@
     ResultSet rs = null;
 
     try {
-        // --- AQUÍ ESTÁ EL CAMBIO: CONEXIÓN MANUAL ---
-        // 1. Cargamos el driver (prueba con 'com.mysql.cj.jdbc.Driver' si es nuevo, o 'com.mysql.jdbc.Driver' si es viejo)
+        // 1. Cargamos el driver
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
             Class.forName("com.mysql.jdbc.Driver");
         }
 
-        // 2. Datos de conexión (AJUSTA EL NOMBRE DE LA BD AQUÍ)
-        // Si tu base de datos no se llama "proyecto_oca", cambia ese nombre.
+        // 2. Datos de conexión 
         String url = "jdbc:mysql://localhost:3306/proyecto_oca?useSSL=false&serverTimezone=UTC"; 
-        String usuarioDB = "root";  // Usuario por defecto de XAMPP
-        String passwordDB = "";     // Contraseña por defecto de XAMPP (vacía)
+        String usuarioDB = "root";
+        String passwordDB = "";
 
         con = DriverManager.getConnection(url, usuarioDB, passwordDB);
         // ------------------------------------------------------
 
         // A. CALCULAR JUGADAS
-        String sqlJugadas = "SELECT COUNT(DISTINCT d1.IdPartida) " +
-                            "FROM DetallesPartida d1 " +
-                            "JOIN DetallesPartida d2 ON d1.IdPartida = d2.IdPartida " +
-                            "WHERE d1.IdJugador = ? AND d2.Casilla = 63";
+        String sqlJugadas = "SELECT COUNT(DISTINCT d1.IdPartida) FROM DetallesPartida d1 JOIN DetallesPartida d2 ON d1.IdPartida = d2.IdPartida WHERE d1.IdJugador = ? AND d2.Casilla = 63";
                             
         ps = con.prepareStatement(sqlJugadas);
         ps.setInt(1, idUsuario);
@@ -139,9 +134,10 @@
 
         <hr>
 
-        <button class="btn verde" onclick="window.location.href='tablero.jsp'">🎲 Ir al Tablero (Prueba)</button>
-        <button class="btn naranja" onclick="alert('Funcionalidad pendiente: Ver partidas')">⏳ Partidas en espera</button>
-        <button class="btn azul" onclick="alert('Funcionalidad pendiente: Crear nueva')">➕ Partida Nueva</button>
+        <button class="btn verde" onclick="alert('Funcionalidad pendiente: Jugar partidas')'">🎲 Partida con turno</button>
+        <button class="btn naranja" onclick="alert('Funcionalidad pendiente: Ver partidas')">⏳ Partida sin turno</button>
+        <button class="btn azul" onclick="window.location.href='seleccion.jsp'">➕ Partida Nueva</button>
+	<button class="btn" onclick="window.location.href='tablero.jsp'">Ir al Tablero (Pruebas)</button>
         
         <br>
         <a href="LogoutServlet" class="cerrar">Cerrar Sesión</a>

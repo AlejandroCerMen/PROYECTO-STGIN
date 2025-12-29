@@ -28,6 +28,34 @@
         <url-pattern>/LogoutServlet</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>GestionSalaServlet</servlet-name>
+        <servlet-class>GestionSalaServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GestionSalaServlet</servlet-name>
+        <url-pattern>/GestionSalaServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>EstadoSalaServlet</servlet-name>
+        <servlet-class>EstadoSalaServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>EstadoSalaServlet</servlet-name>
+        <url-pattern>/EstadoSalaServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>EmpezarJuegoServlet</servlet-name>
+        <servlet-class>EmpezarJuegoServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>EmpezarJuegoServlet</servlet-name>
+        <url-pattern>/EmpezarJuegoServlet</url-pattern>
+    </servlet-mapping>
+
+
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
