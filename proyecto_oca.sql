@@ -14,13 +14,28 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
--- Volcando datos para la tabla proyecto_oca.detallespartida: ~0 rows (aproximadamente)
+-- Volcando datos para la tabla proyecto_oca.detallespartida: ~2 rows (aproximadamente)
+INSERT INTO `detallespartida` (`IdPartida`, `IdJugador`, `Casilla`, `Orden`, `Bloqueo`, `CasillaActual`) VALUES
+	(13, 1, 1, 1, 0, 24),
+	(13, 2, 1, 2, 0, 22);
 
--- Volcando datos para la tabla proyecto_oca.jugadores: ~1 rows (aproximadamente)
+-- Volcando datos para la tabla proyecto_oca.jugadores: ~2 rows (aproximadamente)
 INSERT INTO `jugadores` (`IdJugador`, `Nombre`, `Password`) VALUES
-	(1, 'alejandro', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4');
+	(1, 'alejandro', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'),
+	(2, 'aitana', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4');
 
--- Volcando datos para la tabla proyecto_oca.partidas: ~0 rows (aproximadamente)
+-- Volcando datos para la tabla proyecto_oca.mensajes: ~6 rows (aproximadamente)
+INSERT INTO `mensajes` (`IdMensaje`, `TextoTemplate`) VALUES
+	(1, 'Ha sacado un {0}'),
+	(2, '¡De Oca a Oca! Salta a la casilla {0}'),
+	(3, '¡De Puente a Puente! Salta a la casilla {0}'),
+	(4, '¡El puente está roto! Vuelve a la casilla {0}'),
+	(5, '¡LA MUERTE! Vuelve a empezar'),
+	(6, '¡VICTORIA! Ha llegado a la meta');
+
+-- Volcando datos para la tabla proyecto_oca.partidas: ~1 rows (aproximadamente)
+INSERT INTO `partidas` (`IdPartida`, `Nombre`, `IdJugadorTurno`, `IdEstado`, `Password`, `UltimoValorDado`, `IdUltimoMensaje`) VALUES
+	(13, 'Sala de alejandro', 2, 2, NULL, 4, 1);
 
 -- Volcando datos para la tabla proyecto_oca.tablero: ~63 rows (aproximadamente)
 INSERT INTO `tablero` (`Casilla`, `IdTipo`) VALUES
