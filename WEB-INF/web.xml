@@ -55,6 +55,23 @@
         <url-pattern>/EmpezarJuegoServlet</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>EstadoPartidaServlet</servlet-name>
+        <servlet-class>EstadoPartidaServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>EstadoPartidaServlet</servlet-name>
+        <url-pattern>/EstadoPartidaServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>TirarDadoServlet</servlet-name>
+        <servlet-class>TirarDadoServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>TirarDadoServlet</servlet-name>
+        <url-pattern>/TirarDadoServlet</url-pattern>
+    </servlet-mapping>
 
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
