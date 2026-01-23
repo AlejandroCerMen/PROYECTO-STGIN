@@ -14,17 +14,64 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
--- Volcando datos para la tabla proyecto_oca.detallespartida: ~2 rows (aproximadamente)
+
+-- Volcando estructura de base de datos para proyecto_oca
+CREATE DATABASE IF NOT EXISTS `proyecto_oca` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
+USE `proyecto_oca`;
+
+-- Volcando estructura para tabla proyecto_oca.detallespartida
+CREATE TABLE IF NOT EXISTS `detallespartida` (
+  `IdPartida` int(11) NOT NULL,
+  `IdJugador` int(11) NOT NULL,
+  `Casilla` int(11) DEFAULT 1,
+  `Orden` int(11) DEFAULT NULL,
+  `Bloqueo` int(11) DEFAULT 0,
+  `CasillaActual` int(11) DEFAULT 1,
+  PRIMARY KEY (`IdPartida`,`IdJugador`),
+  KEY `IdJugador` (`IdJugador`),
+  CONSTRAINT `detallespartida_ibfk_1` FOREIGN KEY (`IdPartida`) REFERENCES `partidas` (`IdPartida`) ON DELETE CASCADE,
+  CONSTRAINT `detallespartida_ibfk_2` FOREIGN KEY (`IdJugador`) REFERENCES `jugadores` (`IdJugador`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Volcando datos para la tabla proyecto_oca.detallespartida: ~8 rows (aproximadamente)
+DELETE FROM `detallespartida`;
 INSERT INTO `detallespartida` (`IdPartida`, `IdJugador`, `Casilla`, `Orden`, `Bloqueo`, `CasillaActual`) VALUES
 	(13, 1, 1, 1, 0, 24),
-	(13, 2, 1, 2, 0, 22);
+	(13, 2, 1, 2, 0, 22),
+	(14, 1, 1, 2, 0, 10),
+	(14, 3, 1, 1, 0, 7),
+	(15, 1, 1, 1, 0, 10),
+	(15, 2, 1, 4, 0, 15),
+	(15, 4, 1, 2, 0, 26),
+	(15, 5, 1, 3, 0, 22);
 
--- Volcando datos para la tabla proyecto_oca.jugadores: ~2 rows (aproximadamente)
+-- Volcando estructura para tabla proyecto_oca.jugadores
+CREATE TABLE IF NOT EXISTS `jugadores` (
+  `IdJugador` int(11) NOT NULL AUTO_INCREMENT,
+  `Nombre` varchar(50) NOT NULL,
+  `Password` varchar(255) NOT NULL,
+  PRIMARY KEY (`IdJugador`),
+  UNIQUE KEY `Nombre` (`Nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Volcando datos para la tabla proyecto_oca.jugadores: ~5 rows (aproximadamente)
+DELETE FROM `jugadores`;
 INSERT INTO `jugadores` (`IdJugador`, `Nombre`, `Password`) VALUES
 	(1, 'alejandro', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'),
-	(2, 'aitana', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4');
+	(2, 'aitana', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'),
+	(3, 'G', '333e0a1e27815d0ceee55c473fe3dc93d56c63e3bee2b3b4aee8eed6d70191a3'),
+	(4, 'pablito', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'),
+	(5, 'pablofa', '5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5');
+
+-- Volcando estructura para tabla proyecto_oca.mensajes
+CREATE TABLE IF NOT EXISTS `mensajes` (
+  `IdMensaje` int(11) NOT NULL,
+  `TextoTemplate` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`IdMensaje`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Volcando datos para la tabla proyecto_oca.mensajes: ~6 rows (aproximadamente)
+DELETE FROM `mensajes`;
 INSERT INTO `mensajes` (`IdMensaje`, `TextoTemplate`) VALUES
 	(1, 'Ha sacado un {0}'),
 	(2, '¡De Oca a Oca! Salta a la casilla {0}'),
@@ -33,11 +80,40 @@ INSERT INTO `mensajes` (`IdMensaje`, `TextoTemplate`) VALUES
 	(5, '¡LA MUERTE! Vuelve a empezar'),
 	(6, '¡VICTORIA! Ha llegado a la meta');
 
--- Volcando datos para la tabla proyecto_oca.partidas: ~1 rows (aproximadamente)
+-- Volcando estructura para tabla proyecto_oca.partidas
+CREATE TABLE IF NOT EXISTS `partidas` (
+  `IdPartida` int(11) NOT NULL AUTO_INCREMENT,
+  `Nombre` varchar(50) DEFAULT NULL,
+  `IdJugadorTurno` int(11) DEFAULT NULL,
+  `IdEstado` int(11) DEFAULT 1,
+  `Password` varchar(50) DEFAULT NULL,
+  `UltimoValorDado` int(11) DEFAULT 0,
+  `IdUltimoMensaje` int(11) DEFAULT 1,
+  PRIMARY KEY (`IdPartida`),
+  KEY `IdJugadorTurno` (`IdJugadorTurno`),
+  KEY `fk_mensaje` (`IdUltimoMensaje`),
+  CONSTRAINT `fk_mensaje` FOREIGN KEY (`IdUltimoMensaje`) REFERENCES `mensajes` (`IdMensaje`),
+  CONSTRAINT `partidas_ibfk_1` FOREIGN KEY (`IdJugadorTurno`) REFERENCES `jugadores` (`IdJugador`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Volcando datos para la tabla proyecto_oca.partidas: ~3 rows (aproximadamente)
+DELETE FROM `partidas`;
 INSERT INTO `partidas` (`IdPartida`, `Nombre`, `IdJugadorTurno`, `IdEstado`, `Password`, `UltimoValorDado`, `IdUltimoMensaje`) VALUES
-	(13, 'Sala de alejandro', 2, 2, NULL, 4, 1);
+	(13, 'Sala de alejandro', 2, 2, NULL, 4, 1),
+	(14, 'Sala de G', 1, 2, NULL, 3, 1),
+	(15, 'Sala de alejandro', 1, 2, NULL, 1, 1);
+
+-- Volcando estructura para tabla proyecto_oca.tablero
+CREATE TABLE IF NOT EXISTS `tablero` (
+  `Casilla` int(11) NOT NULL,
+  `IdTipo` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Casilla`),
+  KEY `IdTipo` (`IdTipo`),
+  CONSTRAINT `tablero_ibfk_1` FOREIGN KEY (`IdTipo`) REFERENCES `tipocasilla` (`IdTipo`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Volcando datos para la tabla proyecto_oca.tablero: ~63 rows (aproximadamente)
+DELETE FROM `tablero`;
 INSERT INTO `tablero` (`Casilla`, `IdTipo`) VALUES
 	(1, 1),
 	(2, 1),
@@ -103,7 +179,15 @@ INSERT INTO `tablero` (`Casilla`, `IdTipo`) VALUES
 	(62, 1),
 	(63, 9);
 
+-- Volcando estructura para tabla proyecto_oca.tipocasilla
+CREATE TABLE IF NOT EXISTS `tipocasilla` (
+  `IdTipo` int(11) NOT NULL,
+  `Nombre` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`IdTipo`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- Volcando datos para la tabla proyecto_oca.tipocasilla: ~9 rows (aproximadamente)
+DELETE FROM `tipocasilla`;
 INSERT INTO `tipocasilla` (`IdTipo`, `Nombre`) VALUES
 	(1, 'Normal'),
 	(2, 'Oca'),
