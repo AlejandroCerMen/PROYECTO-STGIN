@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `detallespartida` (
   CONSTRAINT `detallespartida_ibfk_2` FOREIGN KEY (`IdJugador`) REFERENCES `jugadores` (`IdJugador`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Volcando datos para la tabla proyecto_oca.detallespartida: ~8 rows (aproximadamente)
+-- Volcando datos para la tabla proyecto_oca.detallespartida: ~23 rows (aproximadamente)
 DELETE FROM `detallespartida`;
 INSERT INTO `detallespartida` (`IdPartida`, `IdJugador`, `Casilla`, `Orden`, `Bloqueo`, `CasillaActual`) VALUES
 	(13, 1, 1, 1, 0, 24),
@@ -43,7 +43,22 @@ INSERT INTO `detallespartida` (`IdPartida`, `IdJugador`, `Casilla`, `Orden`, `Bl
 	(15, 1, 1, 1, 0, 10),
 	(15, 2, 1, 4, 0, 15),
 	(15, 4, 1, 2, 0, 26),
-	(15, 5, 1, 3, 0, 22);
+	(15, 5, 1, 3, 0, 22),
+	(40, 5, 1, 2, 0, 1),
+	(40, 9, 1, 1, 0, 1),
+	(41, 5, 1, 1, 0, 13),
+	(41, 9, 1, 2, 0, 11),
+	(42, 9, 1, 1, 0, 1),
+	(43, 5, 1, 1, 0, 1),
+	(43, 9, 1, 2, 0, 1),
+	(44, 5, 1, 1, 0, 1),
+	(44, 9, 1, 2, 0, 1),
+	(45, 5, 1, 2, 0, 1),
+	(45, 9, 1, 1, 0, 9),
+	(46, 5, 1, 1, 0, 63),
+	(46, 9, 1, 2, 0, 56),
+	(47, 5, 1, 1, 0, 3),
+	(47, 9, 1, 2, 0, 2);
 
 -- Volcando estructura para tabla proyecto_oca.jugadores
 CREATE TABLE IF NOT EXISTS `jugadores` (
@@ -52,16 +67,17 @@ CREATE TABLE IF NOT EXISTS `jugadores` (
   `Password` varchar(255) NOT NULL,
   PRIMARY KEY (`IdJugador`),
   UNIQUE KEY `Nombre` (`Nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Volcando datos para la tabla proyecto_oca.jugadores: ~5 rows (aproximadamente)
+-- Volcando datos para la tabla proyecto_oca.jugadores: ~6 rows (aproximadamente)
 DELETE FROM `jugadores`;
 INSERT INTO `jugadores` (`IdJugador`, `Nombre`, `Password`) VALUES
 	(1, 'alejandro', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'),
 	(2, 'aitana', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'),
 	(3, 'G', '333e0a1e27815d0ceee55c473fe3dc93d56c63e3bee2b3b4aee8eed6d70191a3'),
 	(4, 'pablito', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'),
-	(5, 'pablofa', '5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5');
+	(5, 'pablofa', '5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5'),
+	(9, 'Paco', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3');
 
 -- Volcando estructura para tabla proyecto_oca.mensajes
 CREATE TABLE IF NOT EXISTS `mensajes` (
@@ -73,12 +89,12 @@ CREATE TABLE IF NOT EXISTS `mensajes` (
 -- Volcando datos para la tabla proyecto_oca.mensajes: ~6 rows (aproximadamente)
 DELETE FROM `mensajes`;
 INSERT INTO `mensajes` (`IdMensaje`, `TextoTemplate`) VALUES
-	(1, 'Ha sacado un {0}'),
-	(2, '¡De Oca a Oca! Salta a la casilla {0}'),
-	(3, '¡De Puente a Puente! Salta a la casilla {0}'),
-	(4, '¡El puente está roto! Vuelve a la casilla {0}'),
-	(5, '¡LA MUERTE! Vuelve a empezar'),
-	(6, '¡VICTORIA! Ha llegado a la meta');
+	(1, '{1} ha sacado un {0}'),
+	(2, '¡De Oca a Oca! {1} salta a la casilla {0}'),
+	(3, '¡De Puente a Puente! {1} salta a la casilla {0}'),
+	(4, '¡El puente está roto! {1} vuelve a la casilla {0}'),
+	(5, '¡LA MUERTE! {1} vuelve a empezar'),
+	(6, '¡FIN DEL JUEGO! {1} ha llegado a la meta');
 
 -- Volcando estructura para tabla proyecto_oca.partidas
 CREATE TABLE IF NOT EXISTS `partidas` (
@@ -89,19 +105,28 @@ CREATE TABLE IF NOT EXISTS `partidas` (
   `Password` varchar(50) DEFAULT NULL,
   `UltimoValorDado` int(11) DEFAULT 0,
   `IdUltimoMensaje` int(11) DEFAULT 1,
+  `IdUltimoJugadorAccion` int(11) DEFAULT NULL,
   PRIMARY KEY (`IdPartida`),
   KEY `IdJugadorTurno` (`IdJugadorTurno`),
   KEY `fk_mensaje` (`IdUltimoMensaje`),
   CONSTRAINT `fk_mensaje` FOREIGN KEY (`IdUltimoMensaje`) REFERENCES `mensajes` (`IdMensaje`),
   CONSTRAINT `partidas_ibfk_1` FOREIGN KEY (`IdJugadorTurno`) REFERENCES `jugadores` (`IdJugador`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Volcando datos para la tabla proyecto_oca.partidas: ~3 rows (aproximadamente)
+-- Volcando datos para la tabla proyecto_oca.partidas: ~11 rows (aproximadamente)
 DELETE FROM `partidas`;
-INSERT INTO `partidas` (`IdPartida`, `Nombre`, `IdJugadorTurno`, `IdEstado`, `Password`, `UltimoValorDado`, `IdUltimoMensaje`) VALUES
-	(13, 'Sala de alejandro', 2, 2, NULL, 4, 1),
-	(14, 'Sala de G', 1, 2, NULL, 3, 1),
-	(15, 'Sala de alejandro', 1, 2, NULL, 1, 1);
+INSERT INTO `partidas` (`IdPartida`, `Nombre`, `IdJugadorTurno`, `IdEstado`, `Password`, `UltimoValorDado`, `IdUltimoMensaje`, `IdUltimoJugadorAccion`) VALUES
+	(13, 'Sala de alejandro', 2, 2, NULL, 4, 1, NULL),
+	(14, 'Sala de G', 1, 2, NULL, 3, 1, NULL),
+	(15, 'Sala de alejandro', 1, 2, NULL, 1, 1, NULL),
+	(40, 'Sala de Paco', 9, 2, NULL, 0, 1, NULL),
+	(41, 'Sala de pablofa', 5, 2, NULL, 2, 1, NULL),
+	(42, 'Sala de Paco', 9, 1, NULL, 0, 1, NULL),
+	(43, 'Sala de pablofa', 5, 2, NULL, 0, 1, NULL),
+	(44, 'Sala de pablofa', 5, 2, NULL, 0, 1, NULL),
+	(45, 'Sala de Paco', 9, 2, NULL, 4, 2, 9),
+	(46, 'Sala de pablofa', 5, 3, NULL, 3, 6, 5),
+	(47, 'Sala de pablofa', 5, 2, NULL, 1, 1, 9);
 
 -- Volcando estructura para tabla proyecto_oca.tablero
 CREATE TABLE IF NOT EXISTS `tablero` (
@@ -115,7 +140,7 @@ CREATE TABLE IF NOT EXISTS `tablero` (
 -- Volcando datos para la tabla proyecto_oca.tablero: ~63 rows (aproximadamente)
 DELETE FROM `tablero`;
 INSERT INTO `tablero` (`Casilla`, `IdTipo`) VALUES
-	(1, 1),
+	(1, 0),
 	(2, 1),
 	(3, 1),
 	(4, 1),
@@ -186,9 +211,10 @@ CREATE TABLE IF NOT EXISTS `tipocasilla` (
   PRIMARY KEY (`IdTipo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Volcando datos para la tabla proyecto_oca.tipocasilla: ~9 rows (aproximadamente)
+-- Volcando datos para la tabla proyecto_oca.tipocasilla: ~10 rows (aproximadamente)
 DELETE FROM `tipocasilla`;
 INSERT INTO `tipocasilla` (`IdTipo`, `Nombre`) VALUES
+	(0, 'Inicio'),
 	(1, 'Normal'),
 	(2, 'Oca'),
 	(3, 'Puente'),

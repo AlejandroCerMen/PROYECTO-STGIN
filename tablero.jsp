@@ -175,6 +175,13 @@
 
                     // 3. ACTUALIZAR DADO
                     document.getElementById("dado-visual").innerText = "🎲 " + data.valorDado;
+                    let panelMensaje = document.getElementById("mensaje-accion");
+                    if (data.ultimoMensaje) {
+                        panelMensaje.innerText = data.ultimoMensaje;
+                    } else {
+                        panelMensaje.innerText = "";
+                    }
+
                 })
                 .catch(e => console.error(e));
         }

@@ -26,7 +26,7 @@ public class EstadoPartidaServlet extends HttpServlet {
             // Unimos la tabla Partidas con Mensajes para sacar el texto
             String sqlP = "SELECT p.IdJugadorTurno, p.UltimoValorDado, p.IdEstado, p.IdUltimoMensaje, m.TextoTemplate " +
                           "FROM Partidas p " +
-                          "JOIN Mensajes m ON p.IdUltimoMensaje = m.IdMensaje " +
+                          "JOIN Mensajes m (JOIN JOIN Jugadores j ON p.IdJugadorTurno = j.IdJugador )ON p.IdUltimoMensaje = m.IdMensaje " +
                           "WHERE p.IdPartida = ?";
             PreparedStatement ps = con.prepareStatement(sqlP);
             ps.setInt(1, idPartida);
@@ -84,9 +84,9 @@ public class EstadoPartidaServlet extends HttpServlet {
             // Si es otro (Oca, Puente...), usamos la casilla de destino.
             String mensajeFinal = "";
             if (idMensaje == 1) {
-                mensajeFinal = textoTemplate.replace("{0}", String.valueOf(valorDado));
+                mensajeFinal = textoTemplate.replace("{0}", String.valueOf(valorDado)).replace("{1}", String.valueOf(idTurno));
             } else {
-                mensajeFinal = textoTemplate.replace("{0}", String.valueOf(casillaJugadorTurno));
+                mensajeFinal = textoTemplate.replace("{0}", String.valueOf(casillaJugadorTurno)).replace("{1}", String.valueOf(idTurno));
             }
 
             // 4. GENERAR JSON
