@@ -22,7 +22,7 @@ public class TirarDadoServlet extends HttpServlet {
             con = ConexionDB.obtenerConexion();
 
             // 1. INFO ACTUAL
-            String sqlInfo = "SELECT CasillaActual, Orden FROM DetallesPartida WHERE IdPartida=? AND IdJugador=?";
+            String sqlInfo = "SELECT CasillaActual, Orden, TurnosCastigo FROM DetallesPartida WHERE IdPartida=? AND IdJugador=?";
             PreparedStatement psInfo = con.prepareStatement(sqlInfo);
             psInfo.setInt(1, idPartida);
             psInfo.setInt(2, miId);
@@ -30,13 +30,31 @@ public class TirarDadoServlet extends HttpServlet {
             
             int casillaActual = 1;
             int miOrden = 0;
+            int castigo = 0;
             if (rsInfo.next()) {
                 casillaActual = rsInfo.getInt("CasillaActual");
                 miOrden = rsInfo.getInt("Orden");
+                castigo = rsInfo.getInt("TurnosCastigo");
             }
             rsInfo.close(); psInfo.close();
+            
+            // 2. LÓGICA DE CASTIGO (Si tiene turnos pendientes, no tira)
+            if (castigo > 0) {
+                // Reducir castigo
+                String sqlReducir = "UPDATE DetallesPartida SET TurnosCastigo = TurnosCastigo - 1 WHERE IdPartida=? AND IdJugador=?";
+                PreparedStatement psR = con.prepareStatement(sqlReducir);
+                psR.setInt(1, idPartida);
+                psR.setInt(2, miId);
+                psR.executeUpdate();
+                psR.close();
 
-            // 2. LÓGICA
+                // Cambiar el turno al siguiente jugador y salir
+                int idSiguiente = obtenerSiguienteJugador(con, idPartida, miOrden);
+                cambiarTurno(con, idPartida, idSiguiente, miId, 0, 9); 
+                response.setStatus(200);
+                return;
+            }
+            // 3. LÓGICA MOVIMIENTO
             int dado = (int) (Math.random() * 6) + 1;
             int nuevaCasilla = casillaActual + dado;
             
@@ -100,20 +118,25 @@ public class TirarDadoServlet extends HttpServlet {
                 else if (nuevaCasilla == 42) {
                     // EL LABERINTO 
                     idMensaje = 9; 
-                    String sqlCastigo = "UPDATE DetallesPartida SET TurnosCastigo = 1 WHERE IdPartida=? AND IdJugador=?"; 
-                    PreparedStatement psC = con.prepareStatement(sqlCastigo);
-                    psC.setInt(1, idPartida);
-                    psC.setInt(2, miId);
-                    psC.executeUpdate(); 
-                    psC.close();
-                } 
+                    // 1. Aplicamos el castigo
+                    String sqlC = "UPDATE DetallesPartida SET TurnosCastigo = 4 WHERE IdPartida=? AND IdJugador=?"; 
+                    try (PreparedStatement psC = con.prepareStatement(sqlC)) {
+                        psC.setInt(1, idPartida);
+                        psC.setInt(2, miId);
+                        psC.executeUpdate(); 
+                    }
+                    // 2. IMPORTANTE: Forzamos que NO repita turno para que pase al siguiente
+                    repetirTurno = false;
+                }
                 else if (nuevaCasilla == 26 || nuevaCasilla == 53) {
                     // CASILLA DE DADOS 
                     idMensaje = 10; 
                     // {1} ha caido en los dados 
-                    repetirTurno = true; } }
+                    repetirTurno = true; 
+                }
+            }
 
-            // 3. ACTUALIZAR POSICIÓN
+            // 4. ACTUALIZAR POSICIÓN
             String sqlUpdPos = "UPDATE DetallesPartida SET CasillaActual = ? WHERE IdPartida=? AND IdJugador=?";
             PreparedStatement psUp = con.prepareStatement(sqlUpdPos);
             psUp.setInt(1, nuevaCasilla);
@@ -122,54 +145,63 @@ public class TirarDadoServlet extends HttpServlet {
             psUp.executeUpdate();
             psUp.close();
 
-            // 4. GUARDAR ESTADO (Usando el IdMensaje)
-if (juegoTerminado) {
-                // Añadimos IdUltimoJugadorAccion=?
+            // 5. GESTIONAR FINAL O CAMBIO DE TURNO
+            if (juegoTerminado) {
                 String sqlFin = "UPDATE Partidas SET IdEstado=3, UltimoValorDado=?, IdUltimoMensaje=?, IdUltimoJugadorAccion=? WHERE IdPartida=?";
                 PreparedStatement psFin = con.prepareStatement(sqlFin);
                 psFin.setInt(1, dado);
                 psFin.setInt(2, idMensaje); 
-                psFin.setInt(3, miId); // <--- IMPORTANTE: Guardamos quién ganó
+                psFin.setInt(3, miId);
                 psFin.setInt(4, idPartida);
                 psFin.executeUpdate();
                 psFin.close();
             } else {
-                int idSiguienteJugador = miId;
+                int idSiguiente = miId;
                 if (!repetirTurno) {
-                    // Lógica de siguiente turno
-                    String sqlCount = "SELECT COUNT(*) FROM DetallesPartida WHERE IdPartida=?";
-                    PreparedStatement psCount = con.prepareStatement(sqlCount);
-                    psCount.setInt(1, idPartida);
-                    ResultSet rsC = psCount.executeQuery(); rsC.next(); int total = rsC.getInt(1);
-                    
-                    int siguienteOrden = miOrden + 1;
-                    if (siguienteOrden > total) siguienteOrden = 1;
-                    
-                    String sqlNext = "SELECT IdJugador FROM DetallesPartida WHERE IdPartida=? AND Orden=?";
-                    PreparedStatement psN = con.prepareStatement(sqlNext);
-                    psN.setInt(1, idPartida);
-                    psN.setInt(2, siguienteOrden);
-                    ResultSet rsN = psN.executeQuery();
-                    if (rsN.next()) idSiguienteJugador = rsN.getInt("IdJugador");
-                    
-                    rsN.close(); psN.close(); rsC.close(); psCount.close();
+                    // Lógica para calcular el siguiente ID de jugador
+                    idSiguiente = obtenerSiguienteJugador(con, idPartida, miOrden);
                 }
-
-                // CORRECCIÓN AQUÍ: Añadimos IdUltimoJugadorAccion=? a la consulta
-                String sqlTurno = "UPDATE Partidas SET IdJugadorTurno=?, UltimoValorDado=?, IdUltimoMensaje=?, IdUltimoJugadorAccion=? WHERE IdPartida=?";
-                PreparedStatement psT = con.prepareStatement(sqlTurno);
-                psT.setInt(1, idSiguienteJugador);
-                psT.setInt(2, dado);
-                psT.setInt(3, idMensaje);
-                psT.setInt(4, miId); // <--- VITAL: Guardamos que TU has sido el que ha movido
-                psT.setInt(5, idPartida);
-                psT.executeUpdate();
-                psT.close();
+                cambiarTurno(con, idPartida, idSiguiente, miId, dado, idMensaje);
             }
+            
             response.setStatus(200);
         } catch (Exception e) {
             e.printStackTrace();
             response.sendError(500);
         } finally { try { if (con != null) con.close(); } catch (Exception e) {} }
+    }
+
+    // Método auxiliar para no repetir código de cambio de turno
+    private void cambiarTurno(Connection con, int idPartida, int idSiguiente, int miId, int dado, int idMensaje) throws SQLException {
+        String sqlTurno = "UPDATE Partidas SET IdJugadorTurno=?, UltimoValorDado=?, IdUltimoMensaje=?, IdUltimoJugadorAccion=? WHERE IdPartida=?";
+        PreparedStatement psT = con.prepareStatement(sqlTurno);
+        psT.setInt(1, idSiguiente);
+        psT.setInt(2, dado);
+        psT.setInt(3, idMensaje);
+        psT.setInt(4, miId);
+        psT.setInt(5, idPartida);
+        psT.executeUpdate();
+        psT.close();
+    }
+
+    private int obtenerSiguienteJugador(Connection con, int idPartida, int miOrden) throws SQLException {
+        String sqlCount = "SELECT COUNT(*) FROM DetallesPartida WHERE IdPartida=?";
+        PreparedStatement psCount = con.prepareStatement(sqlCount);
+        psCount.setInt(1, idPartida);
+        ResultSet rsC = psCount.executeQuery(); rsC.next(); 
+        int total = rsC.getInt(1);
+        rsC.close(); psCount.close();
+
+        int siguienteOrden = (miOrden % total) + 1;
+
+        String sqlNext = "SELECT IdJugador FROM DetallesPartida WHERE IdPartida=? AND Orden=?";
+        PreparedStatement psN = con.prepareStatement(sqlNext);
+        psN.setInt(1, idPartida);
+        psN.setInt(2, siguienteOrden);
+        ResultSet rsN = psN.executeQuery();
+        int idSiguiente = 0;
+        if (rsN.next()) idSiguiente = rsN.getInt("IdJugador");
+        rsN.close(); psN.close();
+        return idSiguiente;
     }
 }
