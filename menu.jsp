@@ -35,7 +35,6 @@
         String url = "jdbc:mysql://localhost:3306/proyecto_oca?useSSL=false&serverTimezone=UTC"; 
         String usuarioDB = "root";
         String passwordDB = "";
-
         con = DriverManager.getConnection(url, usuarioDB, passwordDB);
         // ------------------------------------------------------
 
