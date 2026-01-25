@@ -40,7 +40,7 @@
         // ------------------------------------------------------
 
         // A. CALCULAR JUGADAS
-        String sqlJugadas = "SELECT COUNT(DISTINCT d1.IdPartida) FROM DetallesPartida d1 JOIN DetallesPartida d2 ON d1.IdPartida = d2.IdPartida WHERE d1.IdJugador = ? AND d2.Casilla = 63";
+        String sqlJugadas = "SELECT COUNT(DISTINCT d1.IdPartida) FROM DetallesPartida d1 JOIN DetallesPartida d2 ON d1.IdPartida = d2.IdPartida WHERE d1.IdJugador = ? AND d2.CasillaActual = 63";
                             
         ps = con.prepareStatement(sqlJugadas);
         ps.setInt(1, idUsuario);
@@ -53,7 +53,7 @@
         ps.close();
 
         // B. CALCULAR GANADAS
-        String sqlGanadas = "SELECT COUNT(*) FROM DetallesPartida WHERE IdJugador = ? AND Casilla = 63";
+        String sqlGanadas = "SELECT COUNT(*) FROM DetallesPartida WHERE IdJugador = ? AND CasillaActual = 63";
         ps = con.prepareStatement(sqlGanadas);
         ps.setInt(1, idUsuario);
         rs = ps.executeQuery();
