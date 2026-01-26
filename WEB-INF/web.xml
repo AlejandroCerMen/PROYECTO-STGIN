@@ -73,6 +73,24 @@
         <url-pattern>/TirarDadoServlet</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+	<servlet-name>misPartidas</servlet-name>
+	<servlet-class>misPartidas</servlet-class>
+    </servlet>
+    <servlet-mapping>
+	<servlet-name>misPartidas</servlet-name>
+	<url-pattern>/misPartidas</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>SetPartidaServlet</servlet-name>
+        <servlet-class>SetPartidaServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SetPartidaServlet</servlet-name>
+        <url-pattern>/SetPartidaServlet</url-pattern>
+    </servlet-mapping>
+
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>

@@ -134,8 +134,8 @@
 
         <hr>
 
-        <button class="btn verde" onclick="alert('Funcionalidad pendiente: Jugar partidas')'">🎲 Partida con turno</button>
-        <button class="btn naranja" onclick="alert('Funcionalidad pendiente: Ver partidas')">⏳ Partida sin turno</button>
+        <button class="btn verde" onclick="window.location.href='misPartidas.jsp?tipo=turno'">🎲 Partida con turno</button>
+        <button class="btn naranja" onclick="window.location.href='misPartidas.jsp?tipo=espera'">⏳ Partida sin turno</button>
         <button class="btn azul" onclick="window.location.href='seleccion.jsp'">➕ Partida Nueva</button>
 	<button class="btn" onclick="window.location.href='tablero.jsp'">Ir al Tablero (Pruebas)</button>
         
