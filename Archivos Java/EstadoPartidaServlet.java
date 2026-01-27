@@ -21,7 +21,7 @@ public class EstadoPartidaServlet extends HttpServlet {
         
         Connection con = null;
         try {
-            con = ConexionDB.obtenerConexion();
+            con = ConexionDB.obtenerConexion(); // Asegúrate de que esto coincide con tu clase ConexionDB
 
             // 1. OBTENEMOS DATOS DE LA PARTIDA
             String sqlP = "SELECT p.IdJugadorTurno, p.UltimoValorDado, p.IdEstado, p.IdUltimoMensaje, " +
@@ -68,8 +68,9 @@ public class EstadoPartidaServlet extends HttpServlet {
             
             rs.close(); ps.close();
 
-            // 2. OBTENER JUGADORES (Se mantiene igual)
-            String sqlJ = "SELECT j.IdJugador, j.Nombre, d.Orden, d.CasillaActual " +
+            // 2. OBTENER JUGADORES + COLOR
+            // MODIFICACIÓN: Añadimos 'd.Color' a la consulta
+            String sqlJ = "SELECT j.IdJugador, j.Nombre, d.Orden, d.CasillaActual, d.Color " +
                           "FROM DetallesPartida d JOIN Jugadores j ON d.IdJugador = j.IdJugador " +
                           "WHERE d.IdPartida = ? ORDER BY d.Orden ASC";
             ps = con.prepareStatement(sqlJ);
@@ -83,11 +84,19 @@ public class EstadoPartidaServlet extends HttpServlet {
                 if (!primero) jsonJugadores.append(",");
                 int idJ = rsJ.getInt("IdJugador");
                 int casilla = rsJ.getInt("CasillaActual");
+                
+                // Leemos el color. Si es 0 o nulo, forzamos 1 (Azul) para evitar errores visuales
+                int colorDB = rsJ.getInt("Color");
+                if (colorDB == 0) colorDB = 1;
+
                 if (idJ == idUltimoJugadorAccion) casillaJugadorAccion = casilla;
 
+                // MODIFICACIÓN: Añadimos el campo "color" al JSON
                 jsonJugadores.append("{\"nombre\": \"").append(rsJ.getString("Nombre"))
                              .append("\", \"orden\": ").append(rsJ.getInt("Orden"))
-                             .append(", \"casilla\": ").append(casilla).append("}");
+                             .append(", \"casilla\": ").append(casilla)
+                             .append(", \"color\": ").append(colorDB) // <--- ESTO ES NUEVO
+                             .append("}");
                 primero = false;
             }
             jsonJugadores.append("]");
@@ -104,9 +113,7 @@ public class EstadoPartidaServlet extends HttpServlet {
                 valorReemplazo = String.valueOf(casillaJugadorAccion);
             }
             else if (idMensaje == 9) {
-            // El Laberinto según tu tabla usa {4} para los turnos.
-            // Buscamos cuántos turnos le quedan de castigo al jugador que movió
-        
+                // El Laberinto según tu tabla usa {4} para los turnos.
                 String sqlT = "SELECT TurnosCastigo FROM DetallesPartida WHERE IdPartida=? AND IdJugador=?";
                 PreparedStatement psT = con.prepareStatement(sqlT);
                 psT.setInt(1, idPartida);
@@ -117,7 +124,7 @@ public class EstadoPartidaServlet extends HttpServlet {
             }
             else{
                 valorReemplazo = String.valueOf(casillaJugadorAccion);
-            }     
+            }      
             String mensajeFinal = textoTemplate
                 .replace("{1}", nombreJugadorAccion)
                 .replace("{0}", valorReemplazo)

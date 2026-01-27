@@ -21,7 +21,7 @@
         
         /* FICHAS */
         .ficha { width: 15px; height: 15px; border-radius: 50%; border: 2px solid white; box-shadow: 2px 2px 5px black; transition: top 0.5s, left 0.5s; }
-        .f-1 { background: blue; } .f-2 { background: red; } .f-3 { background: green; } .f-4 { background: yellow; }
+        .c-1 { background: blue; } .c-2 { background: red; } .c-3 { background: green; } .c-4 { background: yellow; }
 
         /* PANEL DE CONTROLES (Flotante) */
         .panel-juego {
@@ -35,6 +35,36 @@
         }
         .btn-tirar:hover { background: #d35400; }
         .info-turno { font-weight: bold; color: #333; margin-bottom: 10px; }
+
+        .leyenda-container {
+            margin-top: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+            text-align: left; /* Alineado a la izquierda para leer mejor nombres */
+        }
+        .leyenda-titulo {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .leyenda-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 15px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        .mini-ficha {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 1px solid #ccc;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -65,6 +95,7 @@
 
 
         <button id="btn-tirar" class="btn-tirar">TIRAR DADO</button>
+        <div id="leyenda-jugadores" class="leyenda-container"></div>
         <br><br>
         <a href="menu.jsp" style="color:red; text-decoration: none;">Salir</a>
     </div>
@@ -163,49 +194,50 @@
         };
 
         function actualizarTablero() {
-            fetch('EstadoPartidaServlet')
-                .then(res => res.json())
-                .then(data => {
-                    // 1. DIBUJAR FICHAS
-                    // Primero limpiamos todas las casillas
-                    document.querySelectorAll('.casilla').forEach(c => c.innerHTML = '');
-                    
-                    data.jugadores.forEach(j => {
-                        let casillaDiv = document.getElementById("casilla-" + j.casilla);
-                        if (casillaDiv) {
-                            let ficha = document.createElement("div");
-                            ficha.className = "ficha f-" + j.orden;
-                            ficha.title = j.nombre;
-                            casillaDiv.appendChild(ficha);
-                        }
-                    });
+        fetch('EstadoPartidaServlet')
+            .then(res => res.json())
+            .then(data => {
+                if(data.error) return;
 
-                    // 2. GESTIÓN DEL TURNO
-                    let btn = document.getElementById("btn-tirar");
-                    let info = document.getElementById("info-turno");
-                    
-                    if (data.esMiTurno) {
-                        btn.style.display = "block";
-                        info.innerText = "¡ES TU TURNO!";
-                        info.style.color = "green";
-                    } else {
-                        btn.style.display = "none";
-                        info.innerText = "Esperando turno...";
-                        info.style.color = "grey";
+                // 1. Limpiar tablero (borrar fichas antiguas)
+                document.querySelectorAll('.ficha').forEach(e => e.remove());
+
+                //Preparamos el HTML de la leyenda
+                let htmlLeyenda = '<div class="leyenda-titulo">Jugadores</div>';
+
+                // 2. Pintar jugadores
+                data.jugadores.forEach(j => {
+                    // Buscamos la casilla donde está el jugador (asegúrate de que tus casillas tengan id="casilla-NUMERO")
+                    let casillaDiv = document.getElementById("casilla-" + j.casilla);
+                    if (casillaDiv) {
+                        let ficha = document.createElement("div");
+                        ficha.classList.add("ficha");                    
+                        // AQUI APLICAMOS EL COLOR QUE VIENE DE LA BD
+                        ficha.classList.add("c-" + j.color);                     
+                        ficha.title = j.nombre; // Tooltip con el nombre
+                        casillaDiv.appendChild(ficha);
                     }
+                    //Añadir a la leyenda
+                        // Usamos las mismas clases c-1, c-2... para la bolita
+                        htmlLeyenda += '<div class="leyenda-item">' +
+                                           '<div class="mini-ficha c-' + j.color + '"></div>' +
+                                           '<span>' + j.nombre + '</span>' +
+                                           '</div>';
+            });
 
-                    // 3. ACTUALIZAR DADO
-                    document.getElementById("dado-visual").innerText = "🎲 " + data.valorDado;
-                    let panelMensaje = document.getElementById("mensaje-accion");
-                    if (data.ultimoMensaje) {
-                        panelMensaje.innerText = data.ultimoMensaje;
-                    } else {
-                        panelMensaje.innerText = "";
-                    }
+            //Actualizamos el div de la leyenda
+            document.getElementById("leyenda-jugadores").innerHTML = htmlLeyenda;
 
-                })
-                .catch(e => console.error(e));
-        }
+            // 3. Gestionar turno
+            if (data.esMiTurno) {
+                document.getElementById("btn-tirar").disabled = false;
+                document.getElementById("mensaje-turno").innerText = "¡Es tu turno!";
+            } else {
+                document.getElementById("btn-tirar").disabled = true;
+                document.getElementById("mensaje-turno").innerText = "Esperando...";
+            }
+        });
+}
 
         function tirarDado() {
             // Ocultamos el botón para no dar doble click

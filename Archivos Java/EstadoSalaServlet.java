@@ -18,11 +18,12 @@ public class EstadoSalaServlet extends HttpServlet {
         }
 
         int idPartida = (Integer) session.getAttribute("id_partida");
-        int miIdUsuario = (Integer) session.getAttribute("id_usuario"); // Obtenemos MI ID
+        int miIdUsuario = (Integer) session.getAttribute("id_usuario"); 
         
         Connection con = null;
         try {
-            con = ConexionDB.obtenerConexion();
+            // Asegúrate que tu método se llama 'conectar' u 'obtenerConexion' según tu ConexionDB.java
+            con = ConexionDB.obtenerConexion(); 
 
             // 1. VER ESTADO Y QUIÉN ES EL LÍDER
             int estado = 1;
@@ -43,7 +44,8 @@ public class EstadoSalaServlet extends HttpServlet {
             rs.close(); ps.close();
 
             // 2. OBTENER JUGADORES
-            String sqlJug = "SELECT j.Nombre, d.Orden FROM DetallesPartida d " +
+            // CAMBIO 1: Añadimos 'j.IdJugador' al SELECT para saber el ID de cada uno
+            String sqlJug = "SELECT j.IdJugador, j.Nombre, d.color FROM DetallesPartida d " +
                             "JOIN Jugadores j ON d.IdJugador = j.IdJugador " +
                             "WHERE d.IdPartida = ? ORDER BY d.Orden ASC";
                             
@@ -51,22 +53,25 @@ public class EstadoSalaServlet extends HttpServlet {
             ps.setInt(1, idPartida);
             ResultSet rsJ = ps.executeQuery();
 
-            // 3. CONSTRUIR JSON (Añadimos el campo "soyLider")
+            // 3. CONSTRUIR JSON
             StringBuilder json = new StringBuilder();
             json.append("{");
             json.append("\"estado\": ").append(estado).append(", ");
-            json.append("\"soyLider\": ").append(soyLider).append(", "); // <--- NUEVO CAMPO
+            json.append("\"soyLider\": ").append(soyLider).append(", ");
             json.append("\"jugadores\": [");
 
             boolean primero = true;
             while (rsJ.next()) {
                 if (!primero) json.append(",");
+                
                 String nombre = rsJ.getString("Nombre"); 
                 if (nombre == null) nombre = "Jugador";
                 
+                // CAMBIO 2: Añadimos el campo "id" al JSON
                 json.append("{");
+                json.append("\"id\": ").append(rsJ.getInt("IdJugador")).append(","); // <--- IMPORTANTE
                 json.append("\"nombre\": \"").append(nombre).append("\",");
-                json.append("\"color\": ").append(rsJ.getInt("Orden"));
+                json.append("\"color\": ").append(rsJ.getInt("Color"));
                 json.append("}");
                 primero = false;
             }

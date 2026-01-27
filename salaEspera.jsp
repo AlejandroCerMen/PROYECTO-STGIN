@@ -5,6 +5,7 @@
         return;
     }
     int idPartida = (Integer) session.getAttribute("id_partida");
+    int miIdUsuario = (Integer) session.getAttribute("id_usuario");
 %>
 <!DOCTYPE html>
 <html>
@@ -46,7 +47,19 @@
 
     <script>
         // 1. DEFINIMOS LAS FUNCIONES (Aún no se ejecutan)
-        
+        var miId = <%= miIdUsuario %>;
+
+        function enviarCambioColor(nuevoColor) {
+            fetch('CambiarColorServlet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'color=' + nuevoColor
+            });
+            if (document.activeElement) {
+                document.activeElement.blur(); 
+            }
+        }
+
         function actualizarSala() {
             fetch('EstadoSalaServlet')
                 .then(function(res) { return res.json(); })
@@ -60,15 +73,39 @@
                         return;
                     }
 
+                    // Comprobamos si el usuario tiene el desplegable abierto (tiene el foco)
+                    var elementoActivo = document.activeElement;
+                    if (elementoActivo && elementoActivo.tagName === "SELECT") {
+                        // Si estás eligiendo color, NO actualizamos la pantalla todavía.
+                        // Así el menú no se cierra.
+                        return; 
+                    }
+
                     // Pintar jugadores
                     var html = "";
                     var total = 0;
                     if (data.jugadores) {
                         total = data.jugadores.length;
                         data.jugadores.forEach(function(j) {
+                            var htmlColor = "";
+
+                            // LOGICA SEGURA 
+                            if (j.id == miId) {
+                                // SI SOY YO: Construimos el HTML del SELECT sumando textos
+                                htmlColor = '<select onchange="enviarCambioColor(this.value)" class="selector-color">';
+                                htmlColor += '<option value="1" ' + (j.color == 1 ? 'selected' : '') + '>🔵 Azul</option>';
+                                htmlColor += '<option value="2" ' + (j.color == 2 ? 'selected' : '') + '>🔴 Rojo</option>';
+                                htmlColor += '<option value="3" ' + (j.color == 3 ? 'selected' : '') + '>🟢 Verde</option>';
+                                htmlColor += '<option value="4" ' + (j.color == 4 ? 'selected' : '') + '>🟡 Amarillo</option>';
+                                htmlColor += '</select>';
+                            } else {
+                                // SI ES OTRO: Ponemos la bola normal
+                                htmlColor = '<div class="bola c-' + j.color + '"></div>';
+                            }
+
                             html += '<div class="jugador-row">' +
                                     '<span>' + j.nombre + '</span>' +
-                                    '<div class="bola c-' + j.color + '"></div>' +
+                                    htmlColor + // Aquí metemos lo que acabamos de crear
                                     '</div>';
                         });
                     }
@@ -97,7 +134,13 @@
         }
 
         function empezarPartida() {
-            fetch('EmpezarJuegoServlet', { method: 'POST' });
+            fetch('EmpezarJuegoServlet', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                    alert("⚠️ " + data.error); // Muestra el aviso de colores repetidos
+                    }
+                });
         }
 
         // 2. EJECUTAMOS TODO AL CARGAR LA PÁGINA
