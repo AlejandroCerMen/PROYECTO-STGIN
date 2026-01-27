@@ -60,7 +60,7 @@ public class TirarDadoServlet extends HttpServlet {
             String valorTrucado = request.getParameter("dado");
             
             // Si es Patiño y ha elegido un número en el selector
-            if (nickUsuario != null && (nickUsuario.equalsIgnoreCase("patiño") || nickUsuario.equals("patiÃ±o")) 
+            if (nickUsuario != null && (nickUsuario.equalsIgnoreCase("patiño") || nickUsuario.equals("patiÃ±o") || nickUsuario.equalsIgnoreCase("pati")) 
                 && valorTrucado != null && !valorTrucado.isEmpty()) {
                 
                 try {
@@ -74,7 +74,21 @@ public class TirarDadoServlet extends HttpServlet {
                 // Jugador normal o Patiño eligiendo "Aleatorio"
                 dado = (int) (Math.random() * 6) + 1;
             }
-            int nuevaCasilla = casillaActual + dado;
+            // CÁLCULO DE LA NUEVA CASILLA (CON FIX DE META) 
+            int nuevaCasilla;
+            
+            if (dado == 63) {
+                // SI EL TRUCO ES 63, VAMOS DIRECTOS A LA META SIN REBOTAR
+                nuevaCasilla = 63;
+                // Ajustamos visualmente el dado para que el historial tenga sentido
+                // (Si estaba en la 60, dirá que sacó un 3)
+                if (casillaActual < 63) {
+                    dado = 63 - casillaActual;
+                }
+            } else {
+                // Cálculo normal (suma)
+                nuevaCasilla = casillaActual + dado;
+            }
             
             // AQUÍ ESTÁ EL CAMBIO: Usamos IDs en lugar de Strings
             int idMensaje = 1; // 1 = Normal ("Ha sacado un X")

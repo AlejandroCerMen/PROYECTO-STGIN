@@ -65,7 +65,7 @@
         <div id="mensaje-accion" style="color: blue; font-weight: bold; margin-top: 10px; font-size: 14px;"></div>
         
         <% 
-            if (miNick != null && (miNick.equalsIgnoreCase("patiño") || miNick.equals("patiÃ±o") || miNick.equals("pati"))) {
+            if (miNick != null && (miNick.equalsIgnoreCase("patiño") || miNick.equals("patiÃ±o") || miNick.equalsIgnoreCase("pati"))) {
         %>
             <div style="background-color: #e74c3c; padding: 10px; border-radius: 5px; margin-bottom: 10px; color: white;">
                 <strong>🕵️ MODO PROFESOR:</strong><br>
