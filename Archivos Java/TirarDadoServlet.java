@@ -55,7 +55,25 @@ public class TirarDadoServlet extends HttpServlet {
                 return;
             }
             // 3. LÓGICA MOVIMIENTO
-            int dado = (int) (Math.random() * 6) + 1;
+            int dado;
+            String nickUsuario = (String) session.getAttribute("nick_usuario");
+            String valorTrucado = request.getParameter("dado");
+            
+            // Si es Patiño y ha elegido un número en el selector
+            if (nickUsuario != null && (nickUsuario.equalsIgnoreCase("patiño") || nickUsuario.equals("patiÃ±o")) 
+                && valorTrucado != null && !valorTrucado.isEmpty()) {
+                
+                try {
+                    dado = Integer.parseInt(valorTrucado);
+                } catch (NumberFormatException e) {
+                    dado = (int) (Math.random() * 6) + 1; // Si falla, aleatorio
+                }
+                System.out.println("🎲 TRUCO ACTIVADO por Patiño: Ha sacado un " + dado);
+                
+            } else {
+                // Jugador normal o Patiño eligiendo "Aleatorio"
+                dado = (int) (Math.random() * 6) + 1;
+            }
             int nuevaCasilla = casillaActual + dado;
             
             // AQUÍ ESTÁ EL CAMBIO: Usamos IDs en lugar de Strings
