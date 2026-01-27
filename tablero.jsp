@@ -43,6 +43,27 @@
         <div id="info-turno" class="info-turno">Cargando...</div>
         <div id="dado-visual" class="dado-visual">🎲</div>
 	<div id="mensaje-accion" style="color: blue; font-weight: bold; margin-top: 10px; font-size: 14px;"></div>
+    <% 
+                String miNick = (String) session.getAttribute("nick_usuario");
+                if (miNick != null && (miNick.equalsIgnoreCase("patiño")|| miNick.equals("patiÃ±o"))) {
+            %>
+                <div style="background-color: #e74c3c; padding: 10px; border-radius: 5px; margin-bottom: 10px; color: white;">
+                    <strong>🕵️ MODO PROFESOR:</strong><br>
+                    Elige el valor del dado: 
+                    <select id="dado-trucado" style="padding: 5px; color: black;">
+                        <option value="">Aleatorio</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="63">Ir a Meta </option>
+                    </select>
+                </div>
+            <% } %>
+
+
         <button id="btn-tirar" class="btn-tirar">TIRAR DADO</button>
         <br><br>
         <a href="menu.jsp" style="color:red; text-decoration: none;">Salir</a>
@@ -190,7 +211,15 @@
             // Ocultamos el botón para no dar doble click
             document.getElementById("btn-tirar").style.display = "none";
             
-            fetch('TirarDadoServlet', { method: 'POST' })
+            //Miramos si existe el selector de trucos
+            let truco = "";
+            let inputTruco = document.getElementById("dado-trucado");
+            if (inputTruco && inputTruco.value !== "") {
+                truco = "?dado=" + inputTruco.value;
+            }
+
+            //Enviamos el truco en la URL
+            fetch('TirarDadoServlet' + truco , { method: 'POST' })
                 .then(res => {
                     if (res.ok) {
                         console.log("Dado tirado");
