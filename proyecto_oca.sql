@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `detallespartida` (
   CONSTRAINT `detallespartida_ibfk_2` FOREIGN KEY (`IdJugador`) REFERENCES `jugadores` (`IdJugador`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Volcando datos para la tabla proyecto_oca.detallespartida: ~82 rows (aproximadamente)
+-- Volcando datos para la tabla proyecto_oca.detallespartida: ~96 rows (aproximadamente)
 DELETE FROM `detallespartida`;
 INSERT INTO `detallespartida` (`IdPartida`, `IdJugador`, `Casilla`, `Orden`, `Bloqueo`, `CasillaActual`, `TurnosCastigo`, `Color`) VALUES
 	(13, 1, 1, 1, 0, 24, 0, NULL),
@@ -133,7 +133,17 @@ INSERT INTO `detallespartida` (`IdPartida`, `IdJugador`, `Casilla`, `Orden`, `Bl
 	(85, 1, 1, 1, 0, 1, 0, 3),
 	(85, 2, 1, 2, 0, 1, 0, 4),
 	(86, 1, 1, 1, 0, 1, 0, 3),
-	(86, 2, 1, 2, 0, 1, 0, 4);
+	(86, 2, 1, 2, 0, 1, 0, 4),
+	(88, 5, 1, 1, 0, 19, 99, 2),
+	(88, 9, 1, 2, 0, 59, 0, 1),
+	(89, 5, 1, 1, 0, 63, 0, 1),
+	(89, 9, 1, 2, 0, 19, 99, 2),
+	(90, 5, 1, 2, 0, 31, 99, 1),
+	(90, 9, 1, 1, 0, 63, 0, 2),
+	(91, 5, 1, 2, 0, 31, 99, 2),
+	(91, 9, 1, 1, 0, 19, 99, 1),
+	(92, 5, 1, 1, 0, 63, 0, 2),
+	(92, 9, 1, 2, 0, 19, 99, 1);
 
 -- Volcando estructura para tabla proyecto_oca.jugadores
 CREATE TABLE IF NOT EXISTS `jugadores` (
@@ -161,7 +171,7 @@ CREATE TABLE IF NOT EXISTS `mensajes` (
   PRIMARY KEY (`IdMensaje`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Volcando datos para la tabla proyecto_oca.mensajes: ~12 rows (aproximadamente)
+-- Volcando datos para la tabla proyecto_oca.mensajes: ~15 rows (aproximadamente)
 DELETE FROM `mensajes`;
 INSERT INTO `mensajes` (`IdMensaje`, `TextoTemplate`) VALUES
 	(0, '¡{1} EMPIEZA EL JUEGO! '),
@@ -171,11 +181,14 @@ INSERT INTO `mensajes` (`IdMensaje`, `TextoTemplate`) VALUES
 	(4, '¡Posada! {1} se quedará a descansar hasta que pase alguien'),
 	(5, '¡POZO! {1} se quedará hasta que alguien le ayude'),
 	(6, '¡FIN DEL JUEGO! {1} ha llegado a la meta'),
-	(7, '¡{1} A LA CARCEL POR SINVERGÜENZA! hasta que lo rescaten'),
+	(7, '¡{1} A LA CARCEL POR SINVERGÜENZA! hasta que alguin lo rescate'),
 	(8, '¡LA MUERTE! {1} vuelve a empezar'),
 	(9, '¡LABERINTO! {1} se ha perdido durante {4} turnos'),
 	(10, '{1} ha caido en los dados'),
-	(11, '¡{1} SE TORRÓ! retrocede a la casilla {0} ');
+	(11, '¡{1} SE TORRÓ! retrocede a la casilla {0} '),
+	(12, 'A {1} le quedan {4} turnos en el laberinto'),
+	(13, '¡{1} saldrá en el próximo turno!'),
+	(14, '{1} esta atrapado hasta que alguien caiga en la misma casilla (jeje pringao)');
 
 -- Volcando estructura para tabla proyecto_oca.partidas
 CREATE TABLE IF NOT EXISTS `partidas` (
@@ -192,9 +205,9 @@ CREATE TABLE IF NOT EXISTS `partidas` (
   KEY `fk_mensaje` (`IdUltimoMensaje`),
   CONSTRAINT `fk_mensaje` FOREIGN KEY (`IdUltimoMensaje`) REFERENCES `mensajes` (`IdMensaje`),
   CONSTRAINT `partidas_ibfk_1` FOREIGN KEY (`IdJugadorTurno`) REFERENCES `jugadores` (`IdJugador`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=87 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Volcando datos para la tabla proyecto_oca.partidas: ~35 rows (aproximadamente)
+-- Volcando datos para la tabla proyecto_oca.partidas: ~50 rows (aproximadamente)
 DELETE FROM `partidas`;
 INSERT INTO `partidas` (`IdPartida`, `Nombre`, `IdJugadorTurno`, `IdEstado`, `Password`, `UltimoValorDado`, `IdUltimoMensaje`, `IdUltimoJugadorAccion`) VALUES
 	(13, 'Sala de alejandro', 2, 2, NULL, 4, 1, NULL),
@@ -246,7 +259,12 @@ INSERT INTO `partidas` (`IdPartida`, `Nombre`, `IdJugadorTurno`, `IdEstado`, `Pa
 	(83, 'Sala de alejandro', 1, 2, NULL, 0, 1, NULL),
 	(84, 'Sala de alejandro', 1, 2, NULL, 0, 1, NULL),
 	(85, 'Sala de alejandro', 1, 2, NULL, 0, 1, NULL),
-	(86, 'Sala de alejandro', 1, 2, NULL, 0, 1, NULL);
+	(86, 'Sala de alejandro', 1, 2, NULL, 0, 1, NULL),
+	(88, 'Sala de pablofa', 5, 3, NULL, 4, 11, 9),
+	(89, 'Sala de pablofa', 5, 3, NULL, 6, 6, 5),
+	(90, 'Sala de Paco', 9, 3, NULL, 1, 6, 9),
+	(91, 'Sala de Paco', 9, 2, NULL, 0, 14, 5),
+	(92, 'Sala de pablofa', 5, 3, NULL, 2, 6, 5);
 
 -- Volcando estructura para tabla proyecto_oca.tablero
 CREATE TABLE IF NOT EXISTS `tablero` (

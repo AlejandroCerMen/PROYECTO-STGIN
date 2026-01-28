@@ -185,28 +185,41 @@
                     // --- 3. GESTIONAR TURNO Y BOTÓN ---
                     var btn = document.getElementById("btn-tirar");
                     var infoTurno = document.getElementById("info-turno");
-                    
-                    if (data.esMiTurno) {
-                        // ES MI TURNO: Mostrar botón y mensaje
-                        if(btn) {
+
+                    // Si el estado es 3, la partida ha terminado
+                    if (data.estadoPartida === 3) {
+                         if (btn) btn.style.display = "none"; // Desaparece el botón para siempre
+                         if (infoTurno) {
+                            if (data.esMiTurno) {
+                                infoTurno.innerText = "¡VICTORIA!";
+                                infoTurno.style.color = "#27ae60"; // Verde
+                            }
+                            else {
+                                infoTurno.innerText = "¡DERROTA!";
+                                infoTurno.style.color = "#e74c3c"; // Rojo
+                            }
+
+                        }
+                    } 
+                    // Si no ha terminado, comprobamos el turno
+                    else if (data.esMiTurno) {
+                        if (btn) {
                             btn.disabled = false;
                             btn.style.display = "inline-block"; 
                         }
-                        if(infoTurno) {
-                            infoTurno.innerText = "¡Es tu turno!";
-                            infoTurno.style.color = "#27ae60"; // Verde
+                        if (infoTurno) {
+                        infoTurno.innerText = "¡Es tu turno!";
+                        infoTurno.style.color = "#27ae60"; // Verde
                         }
-                    } else {
-                        // NO ES MI TURNO: Ocultar botón
-                        if(btn) {
+                    } 
+                    else {
+                        if (btn) {
                             btn.disabled = true;
-                            btn.style.display = "none";
+                             btn.style.display = "none";
                         }
-                        if(infoTurno) {
-                            // Como la versión "que funcionaba" no enviaba nombreTurno,
-                            // ponemos "Esperando..." para asegurar que no falla.
-                            infoTurno.innerText = "Esperando...";
-                            infoTurno.style.color = "#333";
+                        if (infoTurno) {
+                        infoTurno.innerText = "Esperando...";
+                        infoTurno.style.color = "#333";
                         }
                     }
 

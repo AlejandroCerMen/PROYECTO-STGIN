@@ -112,7 +112,7 @@ public class EstadoPartidaServlet extends HttpServlet {
             else if (idMensaje == 11){
                 valorReemplazo = String.valueOf(casillaJugadorAccion);
             }
-            else if (idMensaje == 9) {
+            else if (idMensaje == 9 || idMensaje == 12) {
                 // El Laberinto según tu tabla usa {4} para los turnos.
                 String sqlT = "SELECT TurnosCastigo FROM DetallesPartida WHERE IdPartida=? AND IdJugador=?";
                 PreparedStatement psT = con.prepareStatement(sqlT);

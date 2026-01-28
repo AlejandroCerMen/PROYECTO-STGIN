@@ -20,6 +20,20 @@ public class TirarDadoServlet extends HttpServlet {
         Connection con = null;
         try {
             con = ConexionDB.obtenerConexion();
+            
+            // 0. VERIFICAR SI LA PARTIDA YA TERMINÓ
+            String sqlEstado = "SELECT IdEstado FROM Partidas WHERE IdPartida = ?";
+            try (PreparedStatement psEst = con.prepareStatement(sqlEstado)) {
+                 psEst.setInt(1, idPartida);
+                ResultSet rsEst = psEst.executeQuery();
+                if (rsEst.next()) {
+                     int estado = rsEst.getInt("IdEstado");
+                     if (estado == 3) { // 3 = Finalizada/Victoria
+                          response.sendError(HttpServletResponse.SC_FORBIDDEN, "La partida ya ha terminado.");
+                          return;
+                     }
+                 }
+            }
 
             // 1. INFO ACTUAL
             String sqlInfo = "SELECT CasillaActual, Orden, TurnosCastigo FROM DetallesPartida WHERE IdPartida=? AND IdJugador=?";
@@ -40,17 +54,31 @@ public class TirarDadoServlet extends HttpServlet {
             
             // 2. LÓGICA DE CASTIGO (Si tiene turnos pendientes, no tira)
             if (castigo > 0) {
-                // Reducir castigo
-                String sqlReducir = "UPDATE DetallesPartida SET TurnosCastigo = TurnosCastigo - 1 WHERE IdPartida=? AND IdJugador=?";
-                PreparedStatement psR = con.prepareStatement(sqlReducir);
-                psR.setInt(1, idPartida);
-                psR.setInt(2, miId);
-                psR.executeUpdate();
-                psR.close();
-
-                // Cambiar el turno al siguiente jugador y salir
                 int idSiguiente = obtenerSiguienteJugador(con, idPartida, miOrden);
-                cambiarTurno(con, idPartida, idSiguiente, miId, 0, 9); 
+
+                // --- NUEVA LÓGICA PARA CASTIGO INFINITO ---
+                if (castigo >= 90) { 
+                    // Si es 99, no restamos nada. Solo pasamos el turno.
+                    // Mensaje 12: "{1} sigue atrapado..."
+                    cambiarTurno(con, idPartida, idSiguiente, miId, 0, 14); 
+                } 
+                // --- LÓGICA ORIGINAL PARA TURNOS (LABERINTO) ---
+                else {
+                    // Reducir castigo normal
+                    String sqlReducir = "UPDATE DetallesPartida SET TurnosCastigo = TurnosCastigo - 1 WHERE IdPartida=? AND IdJugador=?";
+                    try (PreparedStatement psR = con.prepareStatement(sqlReducir)) {
+                        psR.setInt(1, idPartida);
+                        psR.setInt(2, miId);
+                        psR.executeUpdate();
+                    }
+
+                    if (castigo > 1) {
+                        cambiarTurno(con, idPartida, idSiguiente, miId, 0, 12);
+                    } else {
+                        cambiarTurno(con, idPartida, idSiguiente, miId, 0, 13);
+                    }
+                }
+                
                 response.setStatus(200);
                 return;
             }
@@ -60,7 +88,7 @@ public class TirarDadoServlet extends HttpServlet {
             String valorTrucado = request.getParameter("dado");
             
             // Si es Patiño y ha elegido un número en el selector
-            if (nickUsuario != null && (nickUsuario.equalsIgnoreCase("patiño") || nickUsuario.equals("patiÃ±o") || nickUsuario.equalsIgnoreCase("pati")) 
+            if (nickUsuario != null && (nickUsuario.equalsIgnoreCase("patiño") || nickUsuario.equals("patiÃ±o")) 
                 && valorTrucado != null && !valorTrucado.isEmpty()) {
                 
                 try {
@@ -74,21 +102,7 @@ public class TirarDadoServlet extends HttpServlet {
                 // Jugador normal o Patiño eligiendo "Aleatorio"
                 dado = (int) (Math.random() * 6) + 1;
             }
-            // CÁLCULO DE LA NUEVA CASILLA (CON FIX DE META) 
-            int nuevaCasilla;
-            
-            if (dado == 63) {
-                // SI EL TRUCO ES 63, VAMOS DIRECTOS A LA META SIN REBOTAR
-                nuevaCasilla = 63;
-                // Ajustamos visualmente el dado para que el historial tenga sentido
-                // (Si estaba en la 60, dirá que sacó un 3)
-                if (casillaActual < 63) {
-                    dado = 63 - casillaActual;
-                }
-            } else {
-                // Cálculo normal (suma)
-                nuevaCasilla = casillaActual + dado;
-            }
+            int nuevaCasilla = casillaActual + dado;
             
             // AQUÍ ESTÁ EL CAMBIO: Usamos IDs en lugar de Strings
             int idMensaje = 1; // 1 = Normal ("Ha sacado un X")
@@ -137,15 +151,24 @@ public class TirarDadoServlet extends HttpServlet {
                 else if (nuevaCasilla == 19) {
                     // LA POSADA
                     idMensaje = 4;
+                    liberarAtrapados(con, idPartida, nuevaCasilla);
+                    setCastigoInfinito(con, idPartida, miId);
+                    repetirTurno = false;
                 } 
                 else if (nuevaCasilla == 31) {
                     // EL POZO
                     idMensaje = 5;
+                    liberarAtrapados(con, idPartida, nuevaCasilla);
+                    setCastigoInfinito(con, idPartida, miId);
+                    repetirTurno = false;
                     // Se queda hasta que otro jugador caiga o pasen N turnos
                 } 
                 else if (nuevaCasilla == 52) {
                     // LA CÁRCEL 
                     idMensaje = 7;
+                    liberarAtrapados(con, idPartida, nuevaCasilla);
+                    setCastigoInfinito(con, idPartida, miId);
+                    repetirTurno = false;
                 } 
                 else if (nuevaCasilla == 42) {
                     // EL LABERINTO 
@@ -235,5 +258,25 @@ public class TirarDadoServlet extends HttpServlet {
         if (rsN.next()) idSiguiente = rsN.getInt("IdJugador");
         rsN.close(); psN.close();
         return idSiguiente;
+    }
+    
+    private void liberarAtrapados(Connection con, int idPartida, int casilla) throws SQLException {
+        // Buscamos a cualquiera que esté en esa casilla y tenga castigo (99) y lo ponemos a 0
+        String sql = "UPDATE DetallesPartida SET TurnosCastigo = 0 " +
+                     "WHERE IdPartida = ? AND CasillaActual = ? AND TurnosCastigo >= 90";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idPartida);
+            ps.setInt(2, casilla);
+            ps.executeUpdate();
+        }
+    }
+
+    private void setCastigoInfinito(Connection con, int idPartida, int idJugador) throws SQLException {
+        String sql = "UPDATE DetallesPartida SET TurnosCastigo = 99 WHERE IdPartida = ? AND IdJugador = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idPartida);
+            ps.setInt(2, idJugador);
+            ps.executeUpdate();
+        }
     }
 }
