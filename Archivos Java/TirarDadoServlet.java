@@ -88,7 +88,7 @@ public class TirarDadoServlet extends HttpServlet {
             String valorTrucado = request.getParameter("dado");
             
             // Si es Patiño y ha elegido un número en el selector
-            if (nickUsuario != null && (nickUsuario.equalsIgnoreCase("patiño") || nickUsuario.equals("patiÃ±o")) 
+            if (nickUsuario != null && (nickUsuario.equalsIgnoreCase("patiño") || nickUsuario.equals("patiÃ±o") || nickUsuario.equalsIgnoreCase("pati")) 
                 && valorTrucado != null && !valorTrucado.isEmpty()) {
                 
                 try {
