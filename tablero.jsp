@@ -86,6 +86,12 @@
         
         <div id="leyenda-jugadores" class="leyenda-container"></div>
 
+        <div style="margin-top: 15px; border-top: 1px solid #ccc; padding-top: 10px;">
+            <button id="btn-musica" style="background:none; border:1px solid #333; cursor:pointer; padding:5px; border-radius:5px; width: 100%;">
+                🎵 Música: OFF
+            </button>
+        </div>
+
         <br>
         <a href="menu.jsp" style="color:red; text-decoration: none;">Salir</a>
     </div>
@@ -141,6 +147,27 @@
             // 3. Arrancar bucle
             actualizarTablero();
             setInterval(actualizarTablero, 1000);
+
+            // LÓGICA MÚSICA DE FONDO 
+            const btnMusica = document.getElementById("btn-musica");
+            const audioMusica = document.getElementById("audio-musica");
+            
+            // Bajamos el volumen al 30% para que sea música de fondo agradable
+            if(audioMusica) audioMusica.volume = 0.3; 
+
+            if(btnMusica && audioMusica) {
+                btnMusica.addEventListener("click", function() {
+                    if (audioMusica.paused) {
+                        audioMusica.play().catch(e => console.log("Error audio:", e));
+                        btnMusica.innerText = "🎵 Música: ON";
+                        btnMusica.style.backgroundColor = "#d4efdf"; // Verde clarito
+                    } else {
+                        audioMusica.pause();
+                        btnMusica.innerText = "🎵 Música: OFF";
+                        btnMusica.style.backgroundColor = "transparent";
+                    }
+                });
+            }
         };
 
         function actualizarTablero() {
@@ -237,6 +264,14 @@
         }
 
         function tirarDado() {
+            
+            // SONIDO DADOS 
+            var sonidoDados = document.getElementById("audio-dados");
+            if (sonidoDados) {
+                sonidoDados.currentTime = 0; // Reinicia el sonido por si le damos muy rápido
+                sonidoDados.play();
+            }
+
             // Ocultamos botón para evitar doble click
             var btn = document.getElementById("btn-tirar");
             if(btn) btn.style.display = "none";
@@ -260,3 +295,11 @@
     </script>
 </body>
 </html>
+
+<audio id="audio-musica" loop>
+    <source src="sonidos/fondo.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="audio-dados">
+    <source src="sonidos/dados.mp3" type="audio/mpeg">
+</audio>
