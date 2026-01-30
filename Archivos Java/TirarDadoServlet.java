@@ -104,10 +104,17 @@ public class TirarDadoServlet extends HttpServlet {
             }
             int nuevaCasilla = casillaActual + dado;
             
-            // AQUÍ ESTÁ EL CAMBIO: Usamos IDs en lugar de Strings
+            
             int idMensaje = 1; // 1 = Normal ("Ha sacado un X")
            boolean repetirTurno = false; 
            boolean juegoTerminado = false; 
+           
+           if (nuevaCasilla > 63) {
+                int exceso = nuevaCasilla - 63;
+                nuevaCasilla = 63 - exceso;
+                idMensaje = 11; // {1} se torró y vuelve a {0}
+            }
+            
            if (nuevaCasilla == 63) { 
                nuevaCasilla = 63; idMensaje = 6; 
                // VICTORIA 
@@ -124,12 +131,6 @@ public class TirarDadoServlet extends HttpServlet {
                     nuevaCasilla = siguienteOca; idMensaje = 2; 
                     // OCA
                     repetirTurno = true; 
-                }
-                else if (nuevaCasilla > 63) {
-                    // REBOTE (Torrarse): Si estoy en 61 y saco un 4: 61+4=65. 65-63=2. 63-2 = 61.
-                    int exceso = nuevaCasilla - 63;
-                    nuevaCasilla = 63 - exceso;
-                    idMensaje = 11; // i{1} SE TORRÓ!
                 } 
                 else if (nuevaCasilla == 6) {
                     nuevaCasilla = 12;

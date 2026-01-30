@@ -50,7 +50,7 @@ public class EmpezarJuegoServlet extends HttpServlet {
                 rs.close(); psVal.close();
 
                 // 2. SI TODO ESTÁ BIEN: Empezamos la partida
-                String sqlEmpezar = "UPDATE Partidas SET IdEstado = 2 WHERE IdPartida = ?";
+                String sqlEmpezar = "UPDATE Partidas SET IdEstado = 2, IdUltimoMensaje = 0 WHERE IdPartida = ?";
                 PreparedStatement psStart = con.prepareStatement(sqlEmpezar);
                 psStart.setInt(1, idPartida);
                 psStart.executeUpdate();
