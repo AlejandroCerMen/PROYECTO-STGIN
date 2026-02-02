@@ -31,7 +31,7 @@ public class TirarDadoServlet extends HttpServlet {
                      if (estado == 3) { // 3 = Finalizada/Victoria
                           response.sendError(HttpServletResponse.SC_FORBIDDEN, "La partida ya ha terminado.");
                           return;
-                     }
+                      }
                  }
             }
 
@@ -52,17 +52,14 @@ public class TirarDadoServlet extends HttpServlet {
             }
             rsInfo.close(); psInfo.close();
             
-            // 2. LÓGICA DE CASTIGO (Si tiene turnos pendientes, no tira)
+            // 2. LÓGICA DE CASTIGO
             if (castigo > 0) {
                 int idSiguiente = obtenerSiguienteJugador(con, idPartida, miOrden);
 
-                // --- NUEVA LÓGICA PARA CASTIGO INFINITO ---
                 if (castigo >= 90) { 
-                    // Si es 99, no restamos nada. Solo pasamos el turno.
-                    // Mensaje 12: "{1} sigue atrapado..."
+                    // Castigo infinito (Pozo/Cárcel/Posada)
                     cambiarTurno(con, idPartida, idSiguiente, miId, 0, 14); 
                 } 
-                // --- LÓGICA ORIGINAL PARA TURNOS (LABERINTO) ---
                 else {
                     // Reducir castigo normal
                     String sqlReducir = "UPDATE DetallesPartida SET TurnosCastigo = TurnosCastigo - 1 WHERE IdPartida=? AND IdJugador=?";
@@ -82,43 +79,62 @@ public class TirarDadoServlet extends HttpServlet {
                 response.setStatus(200);
                 return;
             }
+
             // 3. LÓGICA MOVIMIENTO
             int dado;
             String nickUsuario = (String) session.getAttribute("nick_usuario");
             String valorTrucado = request.getParameter("dado");
             
-            // Si es Patiño y ha elegido un número en el selector
+            // Si es Patiño (o variantes) y ha elegido un número
             if (nickUsuario != null && (nickUsuario.equalsIgnoreCase("patiño") || nickUsuario.equals("patiÃ±o") || nickUsuario.equalsIgnoreCase("pati")) 
                 && valorTrucado != null && !valorTrucado.isEmpty()) {
                 
                 try {
                     dado = Integer.parseInt(valorTrucado);
                 } catch (NumberFormatException e) {
-                    dado = (int) (Math.random() * 6) + 1; // Si falla, aleatorio
+                    dado = (int) (Math.random() * 6) + 1;
                 }
-                System.out.println("🎲 TRUCO ACTIVADO por Patiño: Ha sacado un " + dado);
+                // Debug (opcional)
+                System.out.println("🎲 TRUCO ACTIVADO: " + dado);
                 
             } else {
-                // Jugador normal o Patiño eligiendo "Aleatorio"
                 dado = (int) (Math.random() * 6) + 1;
             }
-            int nuevaCasilla = casillaActual + dado;
+
+            // ==========================================
+            // CORRECCIÓN PARA LA META (TRUCO 63)
+            // ==========================================
+            int nuevaCasilla;
             
+            if (dado == 63) {
+                // Si el truco es 63, vamos directos a la meta (Casilla 63) SIN SUMAR
+                nuevaCasilla = 63;
+                
+                // Ajustamos el valor del dado solo para que en el historial no salga "Has sacado un 63"
+                if (casillaActual < 63) {
+                    dado = 63 - casillaActual;
+                }
+            } else {
+                // Cálculo normal para cualquier otro caso (sumar dado a la casilla actual)
+                nuevaCasilla = casillaActual + dado;
+            }
+            // ==========================================
             
-            int idMensaje = 1; // 1 = Normal ("Ha sacado un X")
-           boolean repetirTurno = false; 
-           boolean juegoTerminado = false; 
-           
-           if (nuevaCasilla > 63) {
+            int idMensaje = 1; 
+            boolean repetirTurno = false; 
+            boolean juegoTerminado = false; 
+            
+            // REBOTE (Si se pasa de 63, pero SOLO si no hemos forzado el 63 antes)
+            if (nuevaCasilla > 63) {
                 int exceso = nuevaCasilla - 63;
                 nuevaCasilla = 63 - exceso;
                 idMensaje = 11; // {1} se torró y vuelve a {0}
             }
             
-           if (nuevaCasilla == 63) { 
+            // COMPROBACIONES DE CASILLAS
+            if (nuevaCasilla == 63) { 
                nuevaCasilla = 63; idMensaje = 6; 
-               // VICTORIA 
-               juegoTerminado = true; 
+               juegoTerminado = true; // VICTORIA
             } 
             else { 
                 if (OCAS.contains(nuevaCasilla)) { 
@@ -129,70 +145,43 @@ public class TirarDadoServlet extends HttpServlet {
                         } 
                     } 
                     nuevaCasilla = siguienteOca; idMensaje = 2; 
-                    // OCA
                     repetirTurno = true; 
                 } 
-                else if (nuevaCasilla == 6) {
-                    nuevaCasilla = 12;
-                    idMensaje = 3; 
-                    // PUENTE A PUENTE 
-                    repetirTurno = true;
-                } 
-                else if (nuevaCasilla == 12) {
-                    nuevaCasilla = 6;
-                    idMensaje = 3;
-                    // PUENTE ROTO 
-                    repetirTurno = true;
-                } 
-                else if (nuevaCasilla == 58) {
-                    nuevaCasilla = 1;
-                    idMensaje = 8;
-                    // MUERTE
-                } 
-                else if (nuevaCasilla == 19) {
-                    // LA POSADA
-                    idMensaje = 4;
+                else if (nuevaCasilla == 6) { nuevaCasilla = 12; idMensaje = 3; repetirTurno = true; } 
+                else if (nuevaCasilla == 12) { nuevaCasilla = 6; idMensaje = 3; repetirTurno = true; } 
+                else if (nuevaCasilla == 58) { nuevaCasilla = 1; idMensaje = 8; } 
+                else if (nuevaCasilla == 19) { 
+                    idMensaje = 4; 
                     liberarAtrapados(con, idPartida, nuevaCasilla);
                     setCastigoInfinito(con, idPartida, miId);
                     repetirTurno = false;
                 } 
-                else if (nuevaCasilla == 31) {
-                    // EL POZO
-                    idMensaje = 5;
-                    liberarAtrapados(con, idPartida, nuevaCasilla);
-                    setCastigoInfinito(con, idPartida, miId);
-                    repetirTurno = false;
-                    // Se queda hasta que otro jugador caiga o pasen N turnos
-                } 
-                else if (nuevaCasilla == 52) {
-                    // LA CÁRCEL 
-                    idMensaje = 7;
+                else if (nuevaCasilla == 31) { 
+                    idMensaje = 5; 
                     liberarAtrapados(con, idPartida, nuevaCasilla);
                     setCastigoInfinito(con, idPartida, miId);
                     repetirTurno = false;
                 } 
-                else if (nuevaCasilla == 42) {
-                    // EL LABERINTO 
+                else if (nuevaCasilla == 52) { 
+                    idMensaje = 7; 
+                    liberarAtrapados(con, idPartida, nuevaCasilla);
+                    setCastigoInfinito(con, idPartida, miId);
+                    repetirTurno = false;
+                } 
+                else if (nuevaCasilla == 42) { 
                     idMensaje = 9; 
-                    // 1. Aplicamos el castigo
                     String sqlC = "UPDATE DetallesPartida SET TurnosCastigo = 4 WHERE IdPartida=? AND IdJugador=?"; 
                     try (PreparedStatement psC = con.prepareStatement(sqlC)) {
                         psC.setInt(1, idPartida);
                         psC.setInt(2, miId);
                         psC.executeUpdate(); 
                     }
-                    // 2. IMPORTANTE: Forzamos que NO repita turno para que pase al siguiente
-                    repetirTurno = false;
+                    repetirTurno = false; 
                 }
-                else if (nuevaCasilla == 26 || nuevaCasilla == 53) {
-                    // CASILLA DE DADOS 
-                    idMensaje = 10; 
-                    // {1} ha caido en los dados 
-                    repetirTurno = true; 
-                }
+                else if (nuevaCasilla == 26 || nuevaCasilla == 53) { idMensaje = 10; repetirTurno = true; }
             }
 
-            // 4. ACTUALIZAR POSICIÓN
+            // 4. ACTUALIZAR POSICIÓN EN BD
             String sqlUpdPos = "UPDATE DetallesPartida SET CasillaActual = ? WHERE IdPartida=? AND IdJugador=?";
             PreparedStatement psUp = con.prepareStatement(sqlUpdPos);
             psUp.setInt(1, nuevaCasilla);
@@ -201,7 +190,7 @@ public class TirarDadoServlet extends HttpServlet {
             psUp.executeUpdate();
             psUp.close();
 
-            // 5. GESTIONAR FINAL O CAMBIO DE TURNO
+            // 5. FINALIZAR O CAMBIAR TURNO
             if (juegoTerminado) {
                 String sqlFin = "UPDATE Partidas SET IdEstado=3, UltimoValorDado=?, IdUltimoMensaje=?, IdUltimoJugadorAccion=? WHERE IdPartida=?";
                 PreparedStatement psFin = con.prepareStatement(sqlFin);
@@ -214,7 +203,6 @@ public class TirarDadoServlet extends HttpServlet {
             } else {
                 int idSiguiente = miId;
                 if (!repetirTurno) {
-                    // Lógica para calcular el siguiente ID de jugador
                     idSiguiente = obtenerSiguienteJugador(con, idPartida, miOrden);
                 }
                 cambiarTurno(con, idPartida, idSiguiente, miId, dado, idMensaje);
@@ -227,7 +215,6 @@ public class TirarDadoServlet extends HttpServlet {
         } finally { try { if (con != null) con.close(); } catch (Exception e) {} }
     }
 
-    // Método auxiliar para no repetir código de cambio de turno
     private void cambiarTurno(Connection con, int idPartida, int idSiguiente, int miId, int dado, int idMensaje) throws SQLException {
         String sqlTurno = "UPDATE Partidas SET IdJugadorTurno=?, UltimoValorDado=?, IdUltimoMensaje=?, IdUltimoJugadorAccion=? WHERE IdPartida=?";
         PreparedStatement psT = con.prepareStatement(sqlTurno);
@@ -262,7 +249,6 @@ public class TirarDadoServlet extends HttpServlet {
     }
     
     private void liberarAtrapados(Connection con, int idPartida, int casilla) throws SQLException {
-        // Buscamos a cualquiera que esté en esa casilla y tenga castigo (99) y lo ponemos a 0
         String sql = "UPDATE DetallesPartida SET TurnosCastigo = 0 " +
                      "WHERE IdPartida = ? AND CasillaActual = ? AND TurnosCastigo >= 90";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
